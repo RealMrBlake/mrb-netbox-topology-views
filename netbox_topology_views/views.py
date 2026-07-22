@@ -971,6 +971,21 @@ class RackElevationView(PermissionRequiredMixin, View):
             rack.elevation_devices = rack_devices[rack.pk]
             rack.elevation_unit_labels = range(rack.u_height or 0, 0, -1)
 
+        rack_export = []
+        for rack in rack_list:
+            rack_export.append({
+                "id": rack.pk, "name": rack.name, "u_height": rack.u_height,
+                "site": str(rack.site), "location": str(rack.location or ""),
+                "devices": [{
+                    "name": device.name or str(device.device_type),
+                    "type": str(device.device_type),
+                    "position": float(device.position or 1),
+                    "height": max(device.device_type.u_height or 1, 1),
+                    "face": device.elevation_face,
+                    "color": f"#{device.role.color}" if device.role.color else "#1685fc",
+                } for device in rack.elevation_devices],
+            })
+
         cable_rows = []
         topology_nodes = {}
         topology_edges = []
@@ -1003,6 +1018,7 @@ class RackElevationView(PermissionRequiredMixin, View):
             "filter_form": RackElevationFilterForm(request.GET or None),
             "racks": rack_list, "cables": cable_rows,
             "rack_topology": {"nodes": list(topology_nodes.values()), "edges": topology_edges},
+            "rack_export": rack_export,
             "faces": (("front", "Vorderseite"), ("rear", "Rückseite")),
             "has_selection": bool(request.GET),
         })

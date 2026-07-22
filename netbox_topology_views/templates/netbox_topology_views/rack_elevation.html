@@ -33,12 +33,23 @@
 </div>
 
 {% if racks %}
+<div class="d-flex justify-content-end align-items-center gap-2 mb-3 flex-wrap">
+  <strong class="me-2">Alle Racks exportieren:</strong>
+  <button class="btn btn-sm btn-outline-primary rack-export" data-format="svg" data-scope="all">SVG</button>
+  <button class="btn btn-sm btn-outline-primary rack-export" data-format="png" data-scope="all">PNG</button>
+  <button class="btn btn-sm btn-outline-primary rack-export" data-format="drawio" data-scope="all">draw.io</button>
+</div>
 <div class="rack-elevation-grid">
   {% for rack in racks %}
   <section class="rack-card">
     <header>
-      <a href="{{ rack.get_absolute_url }}"><strong>{{ rack.name }}</strong></a>
-      <small>{{ rack.site }}{% if rack.location %} · {{ rack.location }}{% endif %} · {{ rack.u_height }}U</small>
+      <div><a href="{{ rack.get_absolute_url }}"><strong>{{ rack.name }}</strong></a><br>
+      <small>{{ rack.site }}{% if rack.location %} · {{ rack.location }}{% endif %} · {{ rack.u_height }}U</small></div>
+      <div class="btn-group" aria-label="{{ rack.name }} exportieren">
+        <button class="btn btn-sm btn-outline-secondary rack-export" data-format="svg" data-scope="{{ rack.pk }}">SVG</button>
+        <button class="btn btn-sm btn-outline-secondary rack-export" data-format="png" data-scope="{{ rack.pk }}">PNG</button>
+        <button class="btn btn-sm btn-outline-secondary rack-export" data-format="drawio" data-scope="{{ rack.pk }}">draw.io</button>
+      </div>
     </header>
     <div class="rack-faces">
       {% for face, face_label in faces %}
@@ -71,9 +82,16 @@
 <div class="card mt-4">
   <div class="card-header d-flex justify-content-between align-items-center">
     <strong>Kabeltopologie</strong>
-    <button id="rack-topology-reset" class="btn btn-sm btn-outline-secondary" type="button">
-      <i class="mdi mdi-restore"></i> Positionen zurücksetzen
-    </button>
+    <div class="d-flex gap-2">
+      <div class="btn-group">
+        <button class="btn btn-sm btn-outline-primary topology-export" data-format="svg">SVG</button>
+        <button class="btn btn-sm btn-outline-primary topology-export" data-format="png">PNG</button>
+        <button class="btn btn-sm btn-outline-primary topology-export" data-format="drawio">draw.io</button>
+      </div>
+      <button id="rack-topology-reset" class="btn btn-sm btn-outline-secondary" type="button">
+        <i class="mdi mdi-restore"></i> Positionen zurücksetzen
+      </button>
+    </div>
   </div>
   <div class="card-body">
     <div id="rack-topology" class="rack-topology" aria-label="Topologie der ausgewählten Racks">
@@ -84,6 +102,7 @@
   </div>
 </div>
 {{ rack_topology|json_script:"rack-topology-data" }}
+{{ rack_export|json_script:"rack-export-data" }}
 
 <div class="card mt-4">
   <div class="card-header"><strong>Verkabelung der angezeigten Racks</strong> <span class="badge bg-secondary">{{ cables|length }}</span></div>
@@ -117,6 +136,7 @@
   const source = document.getElementById('rack-topology-data');
   if (!root || !source) return;
   const data = JSON.parse(source.textContent);
+  const rackData = JSON.parse(document.getElementById('rack-export-data').textContent);
   const columns = root.querySelector('.rack-topology-columns');
   const svg = root.querySelector('svg');
   const tooltip = root.querySelector('.rack-topology-tooltip');
@@ -174,8 +194,8 @@
 
   const drawEdges = () => {
     const bounds = root.getBoundingClientRect();
-    const width = Math.max(root.clientWidth, columns.scrollWidth + 32);
-    const height = Math.max(root.clientHeight, columns.scrollHeight + 32);
+    let width = Math.max(root.clientWidth, columns.scrollWidth + 32);
+    let height = Math.max(root.clientHeight, columns.scrollHeight + 32);
     svg.style.width = `${width}px`;
     svg.style.height = `${height}px`;
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
@@ -281,6 +301,118 @@
     root.querySelectorAll('.rack-topology-node').forEach(node => node.style.transform = '');
     drawEdges();
   });
+
+  const xmlEscape = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;'
+  })[char]);
+  const safeName = value => String(value || 'export').replace(/[^a-z0-9._-]+/gi, '-').replace(/^-|-$/g, '');
+  const svgDocument = (width, height, content) =>
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${content}</svg>`;
+
+  const buildRackSvg = racks => {
+    const unit = 22, faceWidth = 250, labelWidth = 28, faceGap = 28, rackGap = 44, header = 55;
+    const rackWidth = labelWidth + faceWidth * 2 + faceGap;
+    const maxUnits = Math.max(...racks.map(rack => rack.u_height || 1), 1);
+    const width = racks.length * rackWidth + Math.max(0, racks.length - 1) * rackGap + 20;
+    const height = header + maxUnits * unit + 25;
+    let content = '';
+    racks.forEach((rack, rackIndex) => {
+      const baseX = 10 + rackIndex * (rackWidth + rackGap);
+      const rackHeight = rack.u_height * unit;
+      content += `<text x="${baseX}" y="20" fill="#1685fc" font-family="sans-serif" font-size="16" font-weight="700">${xmlEscape(rack.name)}</text>`;
+      content += `<text x="${baseX}" y="39" fill="#778899" font-family="sans-serif" font-size="11">${xmlEscape(rack.site)}${rack.location ? ` · ${xmlEscape(rack.location)}` : ''} · ${rack.u_height}U</text>`;
+      ['front', 'rear'].forEach((face, faceIndex) => {
+        const x = baseX + labelWidth + faceIndex * (faceWidth + faceGap);
+        content += `<text x="${x + faceWidth / 2}" y="51" text-anchor="middle" fill="#778899" font-family="sans-serif" font-size="10">${face === 'front' ? 'VORDERSEITE' : 'RÜCKSEITE'}</text>`;
+        content += `<rect x="${x}" y="${header}" width="${faceWidth}" height="${rackHeight}" fill="none" stroke="#52606d" stroke-width="4"/>`;
+        for (let u = 1; u <= rack.u_height; u++) {
+          const y = header + rackHeight - u * unit;
+          content += `<line x1="${x}" y1="${y}" x2="${x + faceWidth}" y2="${y}" stroke="#667382" stroke-opacity=".35"/>`;
+          if (faceIndex === 0) content += `<text x="${x - 6}" y="${y + 15}" text-anchor="end" fill="#778899" font-family="sans-serif" font-size="9">${u}</text>`;
+        }
+        rack.devices.filter(device => device.face === face).forEach(device => {
+          const y = header + rackHeight - (device.position - 1 + device.height) * unit;
+          const h = Math.max(device.height * unit, 4);
+          content += `<rect x="${x + 3}" y="${y + 1}" width="${faceWidth - 6}" height="${h - 2}" rx="3" fill="#162e45" stroke="${xmlEscape(device.color)}" stroke-width="2"/>`;
+          if (h >= 13) content += `<text x="${x + 9}" y="${y + Math.min(15, h - 4)}" fill="#fff" font-family="sans-serif" font-size="11" font-weight="600">${xmlEscape(device.name.slice(0, 34))}</text>`;
+          if (h >= 31) content += `<text x="${x + 9}" y="${y + 28}" fill="#cad5df" font-family="sans-serif" font-size="9">U${device.position} · ${xmlEscape(device.type.slice(0, 34))}</text>`;
+        });
+      });
+    });
+    return {svg: svgDocument(width, height, content), width, height};
+  };
+
+  const buildTopologySvg = () => {
+    const rootBounds = root.getBoundingClientRect();
+    let width = Math.max(root.clientWidth, columns.scrollWidth + 32);
+    let height = Math.max(root.clientHeight, columns.scrollHeight + 32);
+    const positions = new Map();
+    let content = '';
+    root.querySelectorAll('.rack-topology-node').forEach(node => {
+      const bounds = node.getBoundingClientRect();
+      const x = bounds.left - rootBounds.left + root.scrollLeft;
+      const y = bounds.top - rootBounds.top + root.scrollTop;
+      width = Math.max(width, x + bounds.width + 20);
+      height = Math.max(height, y + bounds.height + 20);
+      positions.set(node.dataset.nodeId, {x: x + bounds.width / 2, y: y + bounds.height / 2});
+      const color = getComputedStyle(node).getPropertyValue('--node-color').trim() || '#1685fc';
+      content += `<rect x="${x}" y="${y}" width="${bounds.width}" height="${bounds.height}" rx="6" fill="#162e45" stroke="${xmlEscape(color)}" stroke-width="2"/>`;
+      content += `<text x="${x + 10}" y="${y + 20}" fill="#fff" font-family="sans-serif" font-size="12" font-weight="600">${xmlEscape(node.querySelector('strong').textContent)}</text>`;
+      content += `<text x="${x + 10}" y="${y + 37}" fill="#cad5df" font-family="sans-serif" font-size="9">${xmlEscape(node.querySelector('small').textContent)}</text>`;
+    });
+    let edgeContent = '';
+    data.edges.forEach(edge => {
+      const a = positions.get(edge.from), b = positions.get(edge.to);
+      if (!a || !b) return;
+      const bend = Math.max(30, Math.abs(b.x - a.x) * .35);
+      edgeContent += `<path d="M ${a.x} ${a.y} C ${a.x + bend} ${a.y}, ${b.x - bend} ${b.y}, ${b.x} ${b.y}" fill="none" stroke="${xmlEscape(edge.color)}" stroke-width="3"/>`;
+    });
+    return {svg: svgDocument(width, height, edgeContent + content), width, height};
+  };
+
+  const downloadBlob = (blob, filename) => {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  };
+  const asDrawio = ({svg, width, height}) => {
+    const image = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+    return `<mxfile host="app.diagrams.net" type="device"><diagram name="Rack export"><mxGraphModel page="0" background="none"><root><mxCell id="0"/><mxCell id="1" parent="0"/><mxCell id="2" value="" style="shape=image;imageAspect=0;aspect=fixed;image=${xmlEscape(image)};" vertex="1" parent="1"><mxGeometry x="0" y="0" width="${width}" height="${height}" as="geometry"/></mxCell></root></mxGraphModel></diagram></mxfile>`;
+  };
+  const exportGraphic = (graphic, format, filename) => {
+    if (format === 'svg') {
+      downloadBlob(new Blob([graphic.svg], {type: 'image/svg+xml'}), `${filename}.svg`);
+    } else if (format === 'drawio') {
+      downloadBlob(new Blob([asDrawio(graphic)], {type: 'application/xml'}), `${filename}.drawio`);
+    } else {
+      const image = new Image();
+      const url = URL.createObjectURL(new Blob([graphic.svg], {type: 'image/svg+xml'}));
+      image.onload = () => {
+        const scale = 2;
+        const canvas = document.createElement('canvas');
+        canvas.width = graphic.width * scale;
+        canvas.height = graphic.height * scale;
+        const context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.scale(scale, scale);
+        context.drawImage(image, 0, 0);
+        canvas.toBlob(blob => downloadBlob(blob, `${filename}.png`), 'image/png');
+        URL.revokeObjectURL(url);
+      };
+      image.src = url;
+    }
+  };
+
+  document.querySelectorAll('.rack-export').forEach(button => button.addEventListener('click', () => {
+    const racks = button.dataset.scope === 'all' ? rackData : rackData.filter(rack => String(rack.id) === button.dataset.scope);
+    const name = button.dataset.scope === 'all' ? 'racks-gesamt' : `rack-${safeName(racks[0]?.name)}`;
+    exportGraphic(buildRackSvg(racks), button.dataset.format, name);
+  }));
+  document.querySelectorAll('.topology-export').forEach(button => button.addEventListener('click', () => {
+    exportGraphic(buildTopologySvg(), button.dataset.format, 'rack-topologie');
+  }));
   requestAnimationFrame(drawEdges);
   window.addEventListener('resize', drawEdges);
 })();

@@ -20,6 +20,8 @@ Rückseite und Verkabelung.
 - Alle verbundenen Ports und Gegenstellen eines Geräts anzeigen
 - Schnittstellen eines Kabels beim Hover anzeigen
 - Geräte und Kabel direkt aus der Topologie in NetBox öffnen
+- Einzelne Racks, alle Racks oder die Kabeltopologie als SVG, PNG und draw.io exportieren
+- Exporte grundsätzlich mit transparentem Hintergrund erzeugen
 - Topologie als PNG oder diagrams.net/draw.io-XML exportieren
 - Zusätzliche Icons für Network-, Leaf-, Spine- und Aggregation-Switche
 - Unterstützung für helle und dunkle NetBox-Themes
@@ -36,7 +38,8 @@ Dieser Fork ergänzt insbesondere:
 6. Hover-Hervorhebung und Port-zu-Port-Verfolgung für Geräte und Kabel.
 7. Lokal gespeicherte Gerätepositionen und eine Funktion zum Zurücksetzen.
 8. Ein erweitertes, skalierbares SVG-Iconset für Switch-Rollen.
-9. Anpassungen für die Verwendung mit NetBox 4.6, darunter die geänderte
+9. Transparente SVG-, PNG- und draw.io-Exporte für Rack- und Topologieansichten.
+10. Anpassungen für die Verwendung mit NetBox 4.6, darunter die geänderte
    `Rack.units`-Property.
 
 ## Vorschau
@@ -153,6 +156,11 @@ In der Kabeltopologie können Geräte per Drag-and-drop verschoben werden. Beim
 Hover über ein Gerät werden dessen Kabel hervorgehoben und alle verbundenen
 Ports aufgelistet. Beim Hover über ein Kabel erscheinen beide Terminierungen.
 Ein Klick öffnet das jeweilige NetBox-Objekt.
+
+Über die Export-Schaltflächen können ein einzelnes Rack, alle aktuell
+angezeigten Racks oder die interaktive Kabeltopologie als SVG, PNG oder
+draw.io-Datei gespeichert werden. Sämtliche Exportformate werden ohne
+Hintergrundfläche erzeugt.
 
 Die Positionen werden im `localStorage` des Browsers gespeichert. Sie gelten
 damit nur für den jeweiligen Browser und die konkrete Rack-/Filterauswahl.
