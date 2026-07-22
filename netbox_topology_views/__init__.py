@@ -6,7 +6,7 @@ class TopologyViewsConfig(PluginConfig):
     verbose_name = "Topology views"
     description = "A plugin to render topology maps"
     version = "4.5.1"
-    author = "Mattijs Vanhaverbeke"
+    author = "Mattijs Vanhaverbeke & LKE"
     author_email = "author@example.com"
     base_url = "netbox_topology_views"
     required_settings = []

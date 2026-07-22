@@ -41,7 +41,7 @@
 </div>
 <div class="rack-elevation-grid">
   {% for rack in racks %}
-  <section class="rack-card">
+  <section class="rack-card" data-rack-id="{{ rack.pk }}" data-rack-units="{{ rack.u_height }}">
     <header>
       <div><a href="{{ rack.get_absolute_url }}"><strong>{{ rack.name }}</strong></a><br>
       <small>{{ rack.site }}{% if rack.location %} · {{ rack.location }}{% endif %} · {{ rack.u_height }}U</small></div>
@@ -63,6 +63,9 @@
             {% for device in rack.elevation_devices %}
               {% if device.elevation_face == face %}
               <a class="rack-device" href="{{ device.get_absolute_url }}"
+                 data-face="{{ face }}" data-device-name="{{ device.name|default:device.device_type.model }}"
+                 data-device-type="{{ device.device_type }}" data-position="{{ device.position|default:1 }}"
+                 data-device-height="{{ device.device_type.u_height|default:1 }}" data-device-color="#{{ device.role.color|default:'1685fc' }}"
                  style="bottom: {{ device.elevation_bottom }}%; height: {{ device.elevation_height }}%; border-color: #{{ device.role.color }}"
                  title="{{ device.name }} · {{ device.device_type }} · U{{ device.position }}">
                 <span>{{ device.name|default:device.device_type.model }}</span>
@@ -311,6 +314,25 @@
   const drawioDocument = cells =>
     `<mxfile host="app.diagrams.net" type="device"><diagram name="Rack export"><mxGraphModel page="0" background="none" grid="1" guides="1" connect="1"><root><mxCell id="0"/><mxCell id="1" parent="0"/>${cells}</root></mxGraphModel></diagram></mxfile>`;
 
+  const renderedRackData = racks => racks.map(rack => {
+    const card = document.querySelector(`.rack-card[data-rack-id="${rack.id}"]`);
+    if (!card) return rack;
+    const rackUnits = Number.parseFloat(card.dataset.rackUnits) || rack.u_height || 1;
+    const devices = Array.from(card.querySelectorAll('.rack-device')).map(device => {
+      const bottom = Number.parseFloat(device.style.bottom) || 0;
+      const height = Number.parseFloat(device.style.height) || (100 / rackUnits);
+      return {
+        name: device.dataset.deviceName || device.querySelector('span')?.textContent || 'Gerät',
+        type: device.dataset.deviceType || '',
+        position: bottom / 100 * rackUnits + 1,
+        height: Math.max(height / 100 * rackUnits, 1),
+        face: device.dataset.face === 'rear' ? 'rear' : 'front',
+        color: device.dataset.deviceColor || '#1685fc',
+      };
+    });
+    return {...rack, devices};
+  });
+
   const buildRackDrawio = racks => {
     const unit = 22, faceWidth = 250, labelWidth = 28, faceGap = 28, rackGap = 44, header = 55;
     const rackWidth = labelWidth + faceWidth * 2 + faceGap;
@@ -451,7 +473,8 @@
   };
 
   document.querySelectorAll('.rack-export').forEach(button => button.addEventListener('click', () => {
-    const racks = button.dataset.scope === 'all' ? rackData : rackData.filter(rack => String(rack.id) === button.dataset.scope);
+    const selectedRacks = button.dataset.scope === 'all' ? rackData : rackData.filter(rack => String(rack.id) === button.dataset.scope);
+    const racks = renderedRackData(selectedRacks);
     const name = button.dataset.scope === 'all' ? 'racks-gesamt' : `rack-${safeName(racks[0]?.name)}`;
     exportGraphic(buildRackSvg(racks), button.dataset.format, name);
   }));
