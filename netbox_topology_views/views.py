@@ -15,6 +15,7 @@ from dcim.models import (
     PowerFeed,
     PowerPanel,
     RearPort,
+    Rack,
 )
 from django.conf import settings
 from django.contrib import messages
@@ -38,6 +39,7 @@ from netbox.views.generic import (
 from netbox_topology_views.filters import DeviceFilterSet, CoordinatesFilterSet, CircuitCoordinatesFilterSet, PowerPanelCoordinatesFilterSet, PowerFeedCoordinatesFilterSet
 from netbox_topology_views.forms import (
     DeviceFilterForm, 
+    RackElevationFilterForm,
     IndividualOptionsForm, 
     CoordinateGroupsForm, 
     CircuitCoordinatesForm, 
@@ -911,6 +913,79 @@ class TopologyHomeView(PermissionRequiredMixin, View):
                 "empty_result": empty_result,
             },
         )
+
+
+def _rack_endpoint(termination):
+    """Return a template-friendly representation of any cable termination."""
+    device = getattr(termination, "device", None)
+    return {
+        "device_name": getattr(device, "name", None) or "External",
+        "name": getattr(termination, "name", str(termination)),
+        "rack_id": getattr(device, "rack_id", None),
+    }
+
+
+class RackElevationView(PermissionRequiredMixin, View):
+    """Render one or more complete rack elevations and their physical cabling."""
+
+    permission_required = ("dcim.view_rack", "dcim.view_device", "dcim.view_cable")
+
+    def get(self, request):
+        racks = Rack.objects.restrict(request.user, "view").select_related("site", "location")
+        if not request.GET:
+            racks = racks.none()
+        selected_racks = request.GET.getlist("rack_id")
+        if selected_racks:
+            racks = racks.filter(pk__in=selected_racks)
+        else:
+            if request.GET.getlist("site_id"):
+                racks = racks.filter(site_id__in=request.GET.getlist("site_id"))
+            if request.GET.getlist("location_id"):
+                racks = racks.filter(location_id__in=request.GET.getlist("location_id"))
+
+        devices = Device.objects.restrict(request.user, "view").filter(
+            rack_id__in=racks.values("pk")
+        ).select_related("device_type", "role", "rack")
+        if request.GET.get("include_empty") not in ("on", "True", "true", "1"):
+            racks = racks.filter(devices__in=devices).distinct()
+
+        rack_list = list(racks.order_by("site__name", "location__name", "name"))
+        rack_ids = {rack.pk for rack in rack_list}
+        rack_devices = {rack_id: [] for rack_id in rack_ids}
+        device_ids = []
+        for device in devices.filter(rack_id__in=rack_ids).order_by("rack_id", "position", "name"):
+            device_ids.append(device.pk)
+            height = max(getattr(device.device_type, "u_height", 1) or 1, 1)
+            rack_height = max(device.rack.u_height or 1, 1)
+            device.elevation_bottom = f"{(float(device.position or 1) - 1) / rack_height * 100:.4f}"
+            device.elevation_height = f"{min(height / rack_height * 100, 100):.4f}"
+            device.elevation_face = str(device.face or "front").lower()
+            rack_devices[device.rack_id].append(device)
+
+        for rack in rack_list:
+            rack.elevation_devices = rack_devices[rack.pk]
+            rack.units = range(rack.u_height or 0, 0, -1)
+
+        cable_rows = []
+        if device_ids:
+            cable_ids = CableTermination.objects.filter(
+                _device_id__in=device_ids
+            ).values_list("cable_id", flat=True).distinct()
+            cables = Cable.objects.restrict(request.user, "view").filter(pk__in=cable_ids)
+            for cable in cables.order_by("label", "pk"):
+                a_terms, b_terms = list(cable.a_terminations), list(cable.b_terminations)
+                for index in range(max(len(a_terms), len(b_terms), 1)):
+                    a = _rack_endpoint(a_terms[index]) if index < len(a_terms) else None
+                    b = _rack_endpoint(b_terms[index]) if index < len(b_terms) else None
+                    if (a and a["rack_id"] in rack_ids) or (b and b["rack_id"] in rack_ids):
+                        cable_rows.append({"cable": cable, "a": a, "b": b})
+
+        return render(request, "netbox_topology_views/rack_elevation.html", {
+            "filter_form": RackElevationFilterForm(request.GET or None),
+            "racks": rack_list, "cables": cable_rows,
+            "faces": (("front", "Vorderseite"), ("rear", "Rückseite")),
+            "has_selection": bool(request.GET),
+        })
 
 
 CONFIG = settings.PLUGINS_CONFIG["netbox_topology_views"]

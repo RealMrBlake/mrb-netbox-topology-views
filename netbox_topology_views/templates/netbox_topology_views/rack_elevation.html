@@ -1,0 +1,93 @@
+{% extends 'generic/_base.html' %}
+{% load helpers %}
+{% load static %}
+
+{% block title %}Rack-Ansicht{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'netbox_topology_views/css/app.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+  <div class="card-header"><strong>Racks auswählen</strong></div>
+  <div class="card-body">
+    <form method="get">
+      <div class="row g-3">
+        {% for field in filter_form %}
+          <div class="col-md-3">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<div class="form-hint">{{ field.help_text }}</div>{% endif %}
+            {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+      <div class="mt-3">
+        <button class="btn btn-primary" type="submit"><i class="mdi mdi-magnify"></i> Anzeigen</button>
+        <a class="btn btn-outline-secondary" href="{% url 'plugins:netbox_topology_views:rack_elevation' %}">Zurücksetzen</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if racks %}
+<div class="rack-elevation-grid">
+  {% for rack in racks %}
+  <section class="rack-card">
+    <header>
+      <a href="{{ rack.get_absolute_url }}"><strong>{{ rack.name }}</strong></a>
+      <small>{{ rack.site }}{% if rack.location %} · {{ rack.location }}{% endif %} · {{ rack.u_height }}U</small>
+    </header>
+    <div class="rack-faces">
+      {% for face, face_label in faces %}
+      <div class="rack-face">
+        <div class="rack-face-title">{{ face_label }}</div>
+        <div class="rack-frame" style="--rack-units: {{ rack.u_height }}">
+          <div class="rack-unit-labels">
+            {% for unit in rack.units %}<span>{{ unit }}</span>{% endfor %}
+          </div>
+          <div class="rack-device-area">
+            {% for device in rack.elevation_devices %}
+              {% if device.elevation_face == face %}
+              <a class="rack-device" href="{{ device.get_absolute_url }}"
+                 style="bottom: {{ device.elevation_bottom }}%; height: {{ device.elevation_height }}%; border-color: #{{ device.role.color }}"
+                 title="{{ device.name }} · {{ device.device_type }} · U{{ device.position }}">
+                <span>{{ device.name|default:device.device_type.model }}</span>
+                <small>U{{ device.position }} · {{ device.device_type }}</small>
+              </a>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+</div>
+
+<div class="card mt-4">
+  <div class="card-header"><strong>Verkabelung der angezeigten Racks</strong> <span class="badge bg-secondary">{{ cables|length }}</span></div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead><tr><th>Kabel</th><th>A-Seite</th><th>B-Seite</th><th>Typ</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for row in cables %}
+        <tr>
+          <td><a href="{{ row.cable.get_absolute_url }}">{{ row.cable.label|default:row.cable }}</a></td>
+          <td>{% if row.a %}<strong>{{ row.a.device_name }}</strong><br><small>{{ row.a.name }}</small>{% else %}—{% endif %}</td>
+          <td>{% if row.b %}<strong>{{ row.b.device_name }}</strong><br><small>{{ row.b.name }}</small>{% else %}—{% endif %}</td>
+          <td>{{ row.cable.type|default:'—' }}</td><td>{{ row.cable.get_status_display }}</td>
+        </tr>
+      {% empty %}<tr><td colspan="5" class="text-muted text-center py-4">Keine Verkabelung gefunden.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% elif has_selection %}
+<div class="alert alert-warning">Für diese Auswahl wurden keine belegten Racks gefunden. Aktiviere „Leere Racks einschließen“, um auch leere Racks zu sehen.</div>
+{% else %}
+<div class="alert alert-info">Wähle ein oder mehrere Racks oder grenze die Ansicht über Standort und Location ein.</div>
+{% endif %}
+{% endblock %}

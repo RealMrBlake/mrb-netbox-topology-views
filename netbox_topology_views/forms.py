@@ -230,7 +230,6 @@ class DeviceFilterForm(
             choices=BOOLEAN_WITH_BLANK_CHOICES
         )
     )
-
     tag = TagFilterField(model)
 
     # options
@@ -360,6 +359,27 @@ class DeviceFilterForm(
             choices=BOOLEAN_WITH_BLANK_CHOICES
         )
     )
+
+
+class RackElevationFilterForm(forms.Form):
+    """Compact selector for the rack elevation view."""
+
+    site_id = DynamicModelMultipleChoiceField(
+        queryset=Site.objects.all(), required=False, label=_("Site")
+    )
+    location_id = DynamicModelMultipleChoiceField(
+        queryset=Location.objects.all(), required=False, label=_("Location"),
+        query_params={"site_id": "$site_id"},
+    )
+    rack_id = DynamicModelMultipleChoiceField(
+        queryset=Rack.objects.all(), required=False, label=_("Racks"),
+        query_params={"site_id": "$site_id", "location_id": "$location_id"},
+        help_text=_("Select one or more racks. If empty, all matching racks are shown."),
+    )
+    include_empty = forms.BooleanField(
+        required=False, initial=False, label=_("Include empty racks")
+    )
+
 
 class CoordinateGroupsForm(NetBoxModelForm):
     fieldsets = (

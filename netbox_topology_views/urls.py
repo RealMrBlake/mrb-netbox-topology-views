@@ -8,6 +8,7 @@ from . import models, views
 urlpatterns = (
     path("", RedirectView.as_view(url="topology/", permanent=True)),
     path("topology/", views.TopologyHomeView.as_view(), name="home"),
+    path("rack-elevation/", views.RackElevationView.as_view(), name="rack_elevation"),
     path("images/", views.TopologyImagesView.as_view(), name="images"),
     path("individualoptions/", views.TopologyIndividualOptionsView.as_view(), name="individualoptions"),
 

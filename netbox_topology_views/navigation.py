@@ -84,6 +84,11 @@ menu = PluginMenu(
                 PluginMenuItem(link="plugins:netbox_topology_views:home", link_text="Topology", permissions=["dcim.view_site", "dcim.view_device"]),
             ),
         ),
+        ('WEITERE ANSICHTEN',
+            (
+                PluginMenuItem(link="plugins:netbox_topology_views:rack_elevation", link_text="Rack-Ansicht", permissions=["dcim.view_rack", "dcim.view_device", "dcim.view_cable"]),
+            ),
+        ),
         ('COORDINATES', 
             (
                 PluginMenuItem(link="plugins:netbox_topology_views:coordinategroup_list", link_text="Coordinate Groups", buttons=coordinategroup_buttons, permissions=['netbox_topology_views.view_coordinategroup']),
