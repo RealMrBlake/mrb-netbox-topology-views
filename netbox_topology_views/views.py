@@ -964,7 +964,7 @@ class RackElevationView(PermissionRequiredMixin, View):
 
         for rack in rack_list:
             rack.elevation_devices = rack_devices[rack.pk]
-            rack.units = range(rack.u_height or 0, 0, -1)
+            rack.elevation_unit_labels = range(rack.u_height or 0, 0, -1)
 
         cable_rows = []
         if device_ids:

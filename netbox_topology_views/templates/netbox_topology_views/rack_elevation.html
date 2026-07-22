@@ -45,7 +45,7 @@
         <div class="rack-face-title">{{ face_label }}</div>
         <div class="rack-frame" style="--rack-units: {{ rack.u_height }}">
           <div class="rack-unit-labels">
-            {% for unit in rack.units %}<span>{{ unit }}</span>{% endfor %}
+            {% for unit in rack.elevation_unit_labels %}<span>{{ unit }}</span>{% endfor %}
           </div>
           <div class="rack-device-area">
             {% for device in rack.elevation_devices %}
