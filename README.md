@@ -1,221 +1,217 @@
-# Netbox Topology Views Plugin
+# MRB NetBox Topology Views
 
-![Version](https://img.shields.io/pypi/v/netbox-topology-views) ![Downloads](https://img.shields.io/pypi/dm/netbox-topology-views)
+Ein angepasster Fork von **NetBox Topology Views** mit erweiterten Rack-Ansichten,
+interaktiver Kabelverfolgung und zusätzlichen Netzwerk-Icons.
 
-Create topology views/maps from your devices in NetBox.
-The connections are based on the cables you created in NetBox.
-Support to filter on name, site, tag and device role.  
-Options to export to xml (for draw.io/diagrams.net) or png.
+Das Plugin erzeugt Topologien aus den in NetBox gepflegten Geräten, Ports und
+Kabeln. Neben der klassischen Topologie bietet dieser Fork eine vollständige
+Darstellung einzelner oder mehrerer Racks einschließlich Vorderseite,
+Rückseite und Verkabelung.
 
-## Preview
+## Vorteile dieses Forks
 
-![Topology with light mode](doc/img/topology_light.png)
-![Topology with dark mode](doc/img/topology_dark.png)
+- Ein oder mehrere Racks gemeinsam anzeigen
+- Geräte positionsgenau anhand ihrer Höheneinheiten darstellen
+- Vorder- und Rückseite eines Racks getrennt betrachten
+- Rackübergreifende und externe Kabelverbindungen erkennen
+- Geräte in der Kabeltopologie frei verschieben
+- Manuelle Positionen pro Rack-Auswahl im Browser speichern
+- Verbindungen eines Geräts beim Hover weiß hervorheben
+- Alle verbundenen Ports und Gegenstellen eines Geräts anzeigen
+- Schnittstellen eines Kabels beim Hover anzeigen
+- Geräte und Kabel direkt aus der Topologie in NetBox öffnen
+- Topologie als PNG oder diagrams.net/draw.io-XML exportieren
+- Zusätzliche Icons für Network-, Leaf-, Spine- und Aggregation-Switche
+- Unterstützung für helle und dunkle NetBox-Themes
 
-## Install
+## Änderungen gegenüber dem Original
 
-**_NOTE:_** For Docker please see: [Docker install](https://github.com/netbox-community/netbox-docker/wiki/Using-Netbox-Plugins)
+Dieser Fork ergänzt insbesondere:
 
-**_NOTE:_** Add `RUN mkdir -p /opt/netbox/netbox/static/netbox_topology_views/img` to the Dockerfile-Plugins file to create the image folder.
+1. Die neue Menükategorie **Weitere Ansichten**.
+2. Eine Rack-Ansicht mit Filtern für Site, Location und mehrere Racks.
+3. Positionsgenaue Rack-Elevations für Vorder- und Rückseite.
+4. Eine Kabeltabelle mit A- und B-Terminierungen.
+5. Eine interaktive, verschiebbare Kabeltopologie unter den Racks.
+6. Hover-Hervorhebung und Port-zu-Port-Verfolgung für Geräte und Kabel.
+7. Lokal gespeicherte Gerätepositionen und eine Funktion zum Zurücksetzen.
+8. Ein erweitertes, skalierbares SVG-Iconset für Switch-Rollen.
+9. Anpassungen für die Verwendung mit NetBox 4.6, darunter die geänderte
+   `Rack.units`-Property.
 
-The plugin is available as a Python package and can be installed with pip.
+## Vorschau
 
-First run `source /opt/netbox/venv/bin/activate` to enter the Python virtual environment.
+Die klassische Topologieansicht stammt aus dem ursprünglichen Plugin:
 
-Then run:
+![Topology in light mode](doc/img/topology_light.png)
+![Topology in dark mode](doc/img/topology_dark.png)
+
+## Installation aus Gitea
+
+Das Plugin kann direkt aus dem `develop`-Branch installiert werden:
+
 ```bash
-cd /opt/netbox/netbox
-pip3 install netbox-topology-views
-python3 manage.py migrate netbox_topology_views
-python3 manage.py collectstatic --no-input
+/opt/netbox/venv/bin/pip install --upgrade --force-reinstall \
+  "git+https://git.mrblake.cc/MrBlake/mrb-netbox-topology-views.git@develop"
 ```
 
-To ensure NetBox Topology Views plugin is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the NetBox root directory (alongside `requirements.txt`) and list the `netbox-topology-views` package:
+Für eine reproduzierbare Produktivinstallation sollte statt `develop` ein
+Release-Tag oder ein bestimmter Commit verwendet werden:
 
-```no-highlight
-echo netbox-topology-views >> /opt/netbox/local_requirements.txt
+```bash
+/opt/netbox/venv/bin/pip install --upgrade --force-reinstall \
+  "git+https://git.mrblake.cc/MrBlake/mrb-netbox-topology-views.git@v4.5.1-mrb.1"
 ```
 
-Once installed, the plugin needs to be enabled in your `configuration.py`:
-```no-highlight
-vim /opt/netbox/netbox/netbox/configuration.py
+Für automatische Neuinstallationen bei einem NetBox-Upgrade wird derselbe
+Eintrag in `/opt/netbox/local_requirements.txt` hinterlegt:
+
+```text
+git+https://git.mrblake.cc/MrBlake/mrb-netbox-topology-views.git@develop
 ```
+
+Bei einem privaten Gitea-Repository muss der NetBox-Server Zugriff über einen
+Deploy-Token oder SSH-Key erhalten.
+
+## NetBox-Konfiguration
+
+In `netbox/configuration.py` wird das Python-Paket aktiviert:
 
 ```python
-PLUGINS = ["netbox_topology_views"]
-```
+PLUGINS = [
+    "netbox_topology_views",
+]
 
-Finally, restart NetBox:
-```no-highlight
-systemctl restart netbox
-```
-
-### Versions
-
-> [!NOTE]  
-> If the version of netbox is not listed here the plugin will most likely not work. Remove the plugin if you want to update netbox before this plugin has released an update for that netbox version.
-
-| netbox version | netbox-topology-views version |
-| -------------- | ----------------------------- |
-| = 4.5.X        | = v4.5.1                      |
-| = 4.4.X        | = v4.4.0                      |
-| = 4.3.X        | = v4.3.0                      |
-| = 4.2.1        | = v4.2.1                      |
-| = 4.2.0        | = v4.2.0                      |
-| = 4.1.X        | = v4.1.0                      |
-| = 4.0.X        | = v4.0.0                      |
-| = 3.7.0        | = v3.9.0                      |
-| = 3.6.4        | = v3.8.1                      |
-| = 3.6.0        | = v3.7.0                      |
-| = 3.5.0        | = v3.6.2                      |
-
-
-### Update
-
-Run `pip install netbox-topology-views --upgrade` in your venv.
-
-Run `python3 manage.py migrate netbox_topology_views`
-
-Run `python3 manage.py collectstatic --no-input`
-
-Clear you browser cache.
-
-## Configure
-
-### Individual Options
-
-All individual options can be assigned a default value per user directly in the plugin. The default value can be overridden on the filter page.
-
-![Individual Options](doc/img/topology_individual_options.png)
-
-The remaining options must be configured in the `PLUGINS_CONFIG` section of your `netbox/configuration.py`.
-
-Example:
-```
 PLUGINS_CONFIG = {
-    'netbox_topology_views': {
-        'static_image_directory': 'netbox_topology_views/img',
-        'allow_coordinates_saving': True,
-        'always_save_coordinates': True
-    }
+    "netbox_topology_views": {
+        "static_image_directory": "netbox_topology_views/img",
+        "allow_coordinates_saving": True,
+        "always_save_coordinates": False,
+    },
 }
 ```
 
-| Setting                  | Default value                                                                                                                                  | Description                                                                                                            |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| static_image_directory   | netbox_topology_views/img                                                                                                                      | (str or pathlib.Path) Specifies the location that images will be loaded from by default. Must be within `STATIC_ROOT`  |
-| allow_coordinates_saving | False                                                                                                                                          | (bool) Set to true if you want to enable the ability to save the coordinates.                           |
-| always_save_coordinates  | False                                                                                                                                          | (bool) Set if you want to enable the option to save coordinates by default. Setting allow_coordinates_saving to true is mandatory.                                             |
+Danach werden Migrationen und statische Dateien verarbeitet:
 
-### Custom field: coordinates
+```bash
+cd /opt/netbox/netbox
+/opt/netbox/venv/bin/python manage.py migrate
+/opt/netbox/venv/bin/python manage.py collectstatic --no-input
+sudo systemctl restart netbox netbox-rq
+```
 
-There is also support for custom fields.
+Nach Änderungen an CSS oder Icons kann ein Hard-Reload des Browsers mit
+`Strg+F5` erforderlich sein.
 
->**_Note:_** The custom field "coordinates" is deprecated and will be removed in the future. Please use Coordinate Groups instead.
+## Aktualisierung
 
-If you create a custom field "coordinates" for "dcim > device" and "Circuits > circuit" with type "text" and name "coordinates" you will see the same layout every time. It is recommended to set this field to "UI visibility" "Hidden" and let the plugin manage it in the background.
+```bash
+/opt/netbox/venv/bin/pip install --upgrade --force-reinstall \
+  "git+https://git.mrblake.cc/MrBlake/mrb-netbox-topology-views.git@develop"
 
-The coordinates are stored as: "X;Y".
+cd /opt/netbox/netbox
+/opt/netbox/venv/bin/python manage.py migrate
+/opt/netbox/venv/bin/python manage.py collectstatic --no-input
+sudo systemctl restart netbox netbox-rq
+```
 
-> Please read the "Configure" chapter to set the `allow_coordinates_saving` option to True.
-You might also set the `always_save_coordinates` option to True.
+`--force-reinstall` ist derzeit sinnvoll, da der Fork intern noch die
+Paketversion `4.5.1` verwendet.
 
-### Convert custom field to Coordinate Groups
+## Verwendung
 
-Please note that values stored in the custom field "coordinates" are not being converted to Coordinate Groups automatically. A pragmatic way to do this conversion yourself is as follows:
-+ Navigate to "Topology" > "Filters".
-+ Select "Show Unconnected" and "Show Cables". 
-+ Leave all other filter settings alone. We want all entries to be displayed!
-+ Click "Search" and wait for the results to be displayed
-+ Select all nodes. This can be done by holding down the Shift key and dragging a frame around all icons with the left mouse button.
-+ Drag the selection a tiny bit to the side. This causes all coordinates for all devices to be stored in the "default" group.
-> **_Hint_**: Don't wait too long after clicking an icon in order to drag. If you hold the mouse button for too long before dragging starts, the selection is reset._
-+ Storing the values might take some time, depending on the number of devices. Please be patient and check "Coordinates" in order to make sure that everthing has been stored.
-+ It is save to delete the custom field now.
+### Klassische Topologie
 
-### Custom Images
+Unter **Plugins → Topology Views → Topology** steht die ursprüngliche,
+filterbare Topologieansicht zur Verfügung. Sie unterstützt unter anderem:
 
-To change image with associated device use the `Images` page - it allows to map a device role with an image found in the NetBox static directory (defined by the plugin config `static_image_directory` which defaults to `netbox_topology_views/img`). You can also upload you own custom images to there - these images will automatically be used for a device (if it does not already have a specified image in the settings) if their name is the device role slug.
+- physische Kabel
+- logische Verbindungen
+- Nachbargeräte
+- Circuit-Terminations
+- Power Feeds
+- Wireless Links
+- Coordinate Groups
+- PNG- und XML-Export
 
-![Images](doc/img/topology_images.png)
+### Rack-Ansicht
 
-## Use
+Die erweiterte Ansicht befindet sich unter:
 
-Go to the plugins tab in the navbar and click topology or go to `$NETBOX_URL/plugins/netbox_topology_views/` to view your topologies
+**Plugins → Topology Views → Weitere Ansichten → Rack-Ansicht**
 
-Select your options for the topology view:
+Über Site, Location und Rack können ein einzelnes Rack oder mehrere Racks
+ausgewählt werden. Optional lassen sich auch leere Racks einblenden.
 
-![Filter Options](doc/img/topology_filter_options.png)
+In der Elevation werden Geräte entsprechend ihrer Position, Gerätehöhe und
+Rack-Seite dargestellt. Unter den Elevations folgen:
 
-<dl>
-    <dt>Coordinate Group</dt>
-    <dd>Select Coordinate Group. These groups allow devices to be displayed in different positions depending on the group, thus providing different representations for the same topology. If nothing is selected, the group "default" is set automatically.</dd>
-    <dt>Save Coordinates</dt>
-    <dd>Save the coordinates of devices in the topology view.</dd>
-    <dt>Show Unconnected</dt>
-    <dd>Show devices that have no connections or for which no connection is displayed. This option depends on other parameters like 'Show Cables' and 'Show Logical Connections'.</dd>
-    <dt>Show Cables</dt>
-    <dd>Show connections between interfaces, front / rear ports, etc., that are connected with one or more cables. These connections are displayed as solid lines in the color of the cable.</dd> 
-    <dt>Show Logical Connections</dt>
-    <dd>Show logical connections between interfaces (referred to as Interface Connections in NetBox) in the topology view. Where the path between
-        interfaces includes multiple cables (e.g., via patch panels), only the end interface connections are shown, not the 
-        intermediate front / rear port connections, etc. This is similar to what was referred to as 'end-to-end' connections in previous versions. These connections are displayed as yellow dotted lines.</dd>
-    <dt>Show redundant Cable and Logical Connection</dt>
-    <dd>Shows a logical connection (in addition to a cable), even if a cable is directly connected. Leaving this option disabled prevents that redundant display. This option only has an effect if 'Show Logical Connections' is activated.</dd>
-    <dt>Show Neighbors</dt>
-    <dd>Adds neighbors to the filter result set automatically. Link peers will be added if 'Show Cables' is ticked, far-end terminations will be added if 'Show Logical Connections' is ticked.</dd>
-    <dt>Show Circuit Terminations</dt>
-    <dd>Show connections which end at a circuit termination in the topology view. These connections are displayed as blue dashed lines.</dd>
-    <dt>Show Power Feeds</dt>
-    <dd>Displays connections between power outlets and power ports. These connections are displayed as solid lines in the color of the cable. This option depends on 'Show Cables'.</dd>
-    <dt>Show Wireless Links</dt>
-    <dd>Displays wireless connections. These connections are displayed as blue dotted lines.</dd>
-</dl>
-    
-### Coordinates and Coordinate Groups
+1. die interaktive Kabeltopologie und
+2. eine tabellarische Übersicht sämtlicher betroffener Kabel.
 
-Netbox Topology Views stores the position of the devices. In order to allow different representations for the topology, Coordinate Groups are supported.
+In der Kabeltopologie können Geräte per Drag-and-drop verschoben werden. Beim
+Hover über ein Gerät werden dessen Kabel hervorgehoben und alle verbundenen
+Ports aufgelistet. Beim Hover über ein Kabel erscheinen beide Terminierungen.
+Ein Klick öffnet das jeweilige NetBox-Objekt.
 
-> Please read the "Configure" chapter to set the `allow_coordinates_saving` option to True.
-You might also set the `always_save_coordinates` option to True.
+Die Positionen werden im `localStorage` des Browsers gespeichert. Sie gelten
+damit nur für den jeweiligen Browser und die konkrete Rack-/Filterauswahl.
 
-Navigate to "Coordinate Groups" in the menu and create as many groups as you like. You can select a group later in the filter pane in order to show icon positions according to this group (see chapter "Use"). You can also omit creating a group if you don't need this feature. Netbox Topology Views automatically creates a group named "default" for you and stores all coordinates in this group, even if you do not select a group in the filter.
+## Geräte-Icons
 
-By default, the position of the devices are calculated with a physics engine. As soon as a device icon is dragged to another location, its position is saved and excluded from the calculation by the physics engine. All saved coordinates can be viewed and edited under the menu item "Coordinates".
+Das Plugin ordnet Icons anhand des Slugs einer Device Role zu. Dieser Fork
+liefert zusätzlich folgende SVG-Dateien aus:
 
-> **_Note:_** At the time of writing, it is not possible to store the positions of circuit terminations, power panels and power feeds, as these are not devices.
+| Device-Role-Slug | Icon-Datei |
+| --- | --- |
+| `network-switch` | `network-switch.svg` |
+| `leaf-switch` | `leaf-switch.svg` |
+| `spine-switch` | `spine-switch.svg` |
+| `aggregation-switch` | `aggregation-switch.svg` |
 
-### Permissions
+Eigene Bilder können weiterhin über die Seite **Images** zugeordnet werden.
+Der Standardpfad lautet `netbox_topology_views/img` innerhalb von
+`STATIC_ROOT`.
 
-To view `/plugins/netbox_topology-views/topology` you need the following permissions:
- + dcim | device | can view device
- + dcim | site | can view site
- + extras | tag | can view tag
- + dcim | device role | can view device role
+## Berechtigungen
 
-To save `Coordinates` when moving icons:
- + netbox_topology_views | coordinate | change
+Für die klassische Topologie werden mindestens folgende Rechte benötigt:
 
-To view `/plugins/netbox_topology-views/images`:
- + dcim | site | view
- + dcim | device role | view
- + dcim | device role | add
- + dcim | device role | change
+- `dcim.view_site`
+- `dcim.view_device`
 
-To view `/plugins/netbox_topology-views/individualoptions`:
- + netbox_topology_views | individual options | change
+Für die Rack-Ansicht werden benötigt:
 
-Set `Coordinate Groups` according to your needs:
- + netbox_topology_views | coordinate groups | view/add/change/delete
+- `dcim.view_rack`
+- `dcim.view_device`
+- `dcim.view_cable`
 
-Set `Coordinates` according to your needs:
- + netbox_topology_views | coordinate | view/add/change/delete
+Für das Speichern klassischer Topologiekoordinaten werden zusätzlich die
+entsprechenden Rechte auf `netbox_topology_views.coordinate` benötigt.
 
-Set `Power Feed Coordinates` according to your needs:
- + netbox_topology_views | power feed coordinate | view/add/change/delete
+## Kompatibilität
 
-Set `Power Panel Coordinates` according to your needs:
- + netbox_topology_views | power panel coordinate | view/add/change/delete
+Die Basis dieses Forks ist NetBox Topology Views `4.5.1`. Die neuen
+Rack-Funktionen wurden für den Einsatz mit NetBox `4.6.5` angepasst. Da das
+ursprüngliche Release offiziell für NetBox 4.5.x ausgewiesen ist, sollten
+Updates auf neuere NetBox-Versionen zunächst in einer Testumgebung geprüft
+werden.
 
-Set `Circuit Coordinates` according to your needs:
- + netbox_topology_views | circuit coordinate | view/add/change/delete
+## Ursprung und Danksagung
+
+Dieses Projekt ist ein Fork des Open-Source-Plugins
+[NetBox Topology Views](https://github.com/mattieserver/netbox-topology-views).
+
+Das ursprüngliche Plugin wurde von **Mattijs Vanhaverbeke** erstellt. Der
+größte Teil der klassischen Topologieansicht, Datenmodelle, Filter und
+Exportfunktionen basiert auf seiner Arbeit und den Beiträgen des ursprünglichen
+Projekts.
+
+Dieser Fork wird unabhängig weiterentwickelt und ist nicht mit dem
+ursprünglichen Autor oder dem NetBox-Projekt offiziell verbunden.
+
+## Lizenz
+
+Das Projekt steht wie das Original unter der
+[Apache License 2.0](LICENSE). Bestehende Copyright-, Lizenz- und
+Urheberhinweise des ursprünglichen Projekts bleiben erhalten.
