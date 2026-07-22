@@ -6,6 +6,7 @@
 
 {% block head %}
   <link rel="stylesheet" href="{% static 'netbox_topology_views/css/app.css' %}">
+  <link rel="stylesheet" href="{% static 'netbox_topology_views/css/rack_elevation.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -68,6 +69,17 @@
 </div>
 
 <div class="card mt-4">
+  <div class="card-header"><strong>Kabeltopologie</strong></div>
+  <div class="card-body">
+    <div id="rack-topology" class="rack-topology" aria-label="Topologie der ausgewählten Racks">
+      <svg class="rack-topology-lines" aria-hidden="true"></svg>
+      <div class="rack-topology-columns"></div>
+    </div>
+  </div>
+</div>
+{{ rack_topology|json_script:"rack-topology-data" }}
+
+<div class="card mt-4">
   <div class="card-header"><strong>Verkabelung der angezeigten Racks</strong> <span class="badge bg-secondary">{{ cables|length }}</span></div>
   <div class="table-responsive">
     <table class="table table-hover mb-0">
@@ -90,4 +102,78 @@
 {% else %}
 <div class="alert alert-info">Wähle ein oder mehrere Racks oder grenze die Ansicht über Standort und Location ein.</div>
 {% endif %}
+{% endblock %}
+
+{% block javascript %}
+<script>
+(() => {
+  const root = document.getElementById('rack-topology');
+  const source = document.getElementById('rack-topology-data');
+  if (!root || !source) return;
+  const data = JSON.parse(source.textContent);
+  const columns = root.querySelector('.rack-topology-columns');
+  const svg = root.querySelector('svg');
+  const groups = new Map();
+
+  data.nodes.forEach(node => {
+    const groupName = node.rack_name || 'Extern';
+    if (!groups.has(groupName)) groups.set(groupName, []);
+    groups.get(groupName).push(node);
+  });
+
+  groups.forEach((nodes, name) => {
+    const column = document.createElement('section');
+    column.className = 'rack-topology-column';
+    const heading = document.createElement('h4');
+    heading.textContent = name;
+    column.appendChild(heading);
+    nodes.forEach(node => {
+      const item = document.createElement(node.url ? 'a' : 'div');
+      item.className = 'rack-topology-node';
+      item.id = `topology-${node.node_id}`;
+      item.style.setProperty('--node-color', `#${node.color}`);
+      if (node.url) item.href = node.url;
+      const nameElement = document.createElement('strong');
+      nameElement.textContent = node.device_name;
+      const portElement = document.createElement('small');
+      portElement.textContent = node.name;
+      item.append(nameElement, portElement);
+      column.appendChild(item);
+    });
+    columns.appendChild(column);
+  });
+
+  const drawEdges = () => {
+    const bounds = root.getBoundingClientRect();
+    const width = Math.max(root.clientWidth, columns.scrollWidth + 32);
+    const height = Math.max(root.clientHeight, columns.scrollHeight + 32);
+    svg.style.width = `${width}px`;
+    svg.style.height = `${height}px`;
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    svg.replaceChildren();
+    data.edges.forEach(edge => {
+      const from = document.getElementById(`topology-${edge.from}`);
+      const to = document.getElementById(`topology-${edge.to}`);
+      if (!from || !to) return;
+      const a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
+      const x1 = a.left + a.width / 2 - bounds.left;
+      const y1 = a.top + a.height / 2 - bounds.top;
+      const x2 = b.left + b.width / 2 - bounds.left;
+      const y2 = b.top + b.height / 2 - bounds.top;
+      const bend = Math.max(30, Math.abs(x2 - x1) * .35);
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', `M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}`);
+      path.setAttribute('stroke', edge.color);
+      path.classList.add('rack-topology-edge');
+      const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+      title.textContent = edge.label;
+      path.appendChild(title);
+      if (edge.url) path.addEventListener('click', () => window.location.href = edge.url);
+      svg.appendChild(path);
+    });
+  };
+  requestAnimationFrame(drawEdges);
+  window.addEventListener('resize', drawEdges);
+})();
+</script>
 {% endblock %}

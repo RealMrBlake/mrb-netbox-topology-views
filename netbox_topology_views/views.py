@@ -919,9 +919,14 @@ def _rack_endpoint(termination):
     """Return a template-friendly representation of any cable termination."""
     device = getattr(termination, "device", None)
     return {
+        "node_id": f"device-{device.pk}" if device else f"external-{termination._meta.model_name}-{termination.pk}",
+        "device_id": getattr(device, "pk", None),
         "device_name": getattr(device, "name", None) or "External",
         "name": getattr(termination, "name", str(termination)),
         "rack_id": getattr(device, "rack_id", None),
+        "rack_name": getattr(getattr(device, "rack", None), "name", None) or "Extern",
+        "url": device.get_absolute_url() if device else None,
+        "color": getattr(getattr(device, "role", None), "color", None) or "1685fc",
     }
 
 
@@ -967,6 +972,8 @@ class RackElevationView(PermissionRequiredMixin, View):
             rack.elevation_unit_labels = range(rack.u_height or 0, 0, -1)
 
         cable_rows = []
+        topology_nodes = {}
+        topology_edges = []
         if device_ids:
             cable_ids = CableTermination.objects.filter(
                 _device_id__in=device_ids
@@ -979,10 +986,21 @@ class RackElevationView(PermissionRequiredMixin, View):
                     b = _rack_endpoint(b_terms[index]) if index < len(b_terms) else None
                     if (a and a["rack_id"] in rack_ids) or (b and b["rack_id"] in rack_ids):
                         cable_rows.append({"cable": cable, "a": a, "b": b})
+                        for endpoint in (a, b):
+                            if endpoint:
+                                topology_nodes[endpoint["node_id"]] = endpoint
+                        if a and b:
+                            topology_edges.append({
+                                "from": a["node_id"], "to": b["node_id"],
+                                "label": cable.label or str(cable),
+                                "color": f"#{cable.color}" if cable.color else "#1685fc",
+                                "url": cable.get_absolute_url(),
+                            })
 
         return render(request, "netbox_topology_views/rack_elevation.html", {
             "filter_form": RackElevationFilterForm(request.GET or None),
             "racks": rack_list, "cables": cable_rows,
+            "rack_topology": {"nodes": list(topology_nodes.values()), "edges": topology_edges},
             "faces": (("front", "Vorderseite"), ("rear", "Rückseite")),
             "has_selection": bool(request.GET),
         })
