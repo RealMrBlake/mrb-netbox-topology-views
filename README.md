@@ -160,7 +160,9 @@ Ein Klick öffnet das jeweilige NetBox-Objekt.
 Über die Export-Schaltflächen können ein einzelnes Rack, alle aktuell
 angezeigten Racks oder die interaktive Kabeltopologie als SVG, PNG oder
 draw.io-Datei gespeichert werden. Sämtliche Exportformate werden ohne
-Hintergrundfläche erzeugt.
+Hintergrundfläche erzeugt. Im draw.io-Export bleiben Rack-Rahmen, Geräte und
+Beschriftungen als einzelne Elemente bearbeitbar. Topologiekabel werden als
+echte Kanten exportiert und folgen den Geräten beim Verschieben in draw.io.
 
 Die Positionen werden im `localStorage` des Browsers gespeichert. Sie gelten
 damit nur für den jeweiligen Browser und die konkrete Rack-/Filterauswahl.

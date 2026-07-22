@@ -308,6 +308,41 @@
   const safeName = value => String(value || 'export').replace(/[^a-z0-9._-]+/gi, '-').replace(/^-|-$/g, '');
   const svgDocument = (width, height, content) =>
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${content}</svg>`;
+  const drawioDocument = cells =>
+    `<mxfile host="app.diagrams.net" type="device"><diagram name="Rack export"><mxGraphModel page="0" background="none" grid="1" guides="1" connect="1"><root><mxCell id="0"/><mxCell id="1" parent="0"/>${cells}</root></mxGraphModel></diagram></mxfile>`;
+
+  const buildRackDrawio = racks => {
+    const unit = 22, faceWidth = 250, labelWidth = 28, faceGap = 28, rackGap = 44, header = 55;
+    const rackWidth = labelWidth + faceWidth * 2 + faceGap;
+    let cells = '', cellId = 2;
+    const vertex = (value, style, x, y, width, height) => {
+      const id = cellId++;
+      cells += `<mxCell id="${id}" value="${xmlEscape(value)}" style="${style}" vertex="1" parent="1"><mxGeometry x="${x}" y="${y}" width="${width}" height="${height}" as="geometry"/></mxCell>`;
+      return id;
+    };
+    racks.forEach((rack, rackIndex) => {
+      const baseX = 10 + rackIndex * (rackWidth + rackGap);
+      const rackHeight = rack.u_height * unit;
+      vertex(rack.name, 'text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#1685fc;', baseX, 0, rackWidth, 25);
+      vertex(`${rack.site}${rack.location ? ` · ${rack.location}` : ''} · ${rack.u_height}U`, 'text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontColor=#778899;', baseX, 24, rackWidth, 20);
+      ['front', 'rear'].forEach((face, faceIndex) => {
+        const x = baseX + labelWidth + faceIndex * (faceWidth + faceGap);
+        vertex(face === 'front' ? 'VORDERSEITE' : 'RÜCKSEITE', 'text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#778899;', x, 38, faceWidth, 17);
+        vertex('', 'rounded=0;html=1;fillColor=none;strokeColor=#52606d;strokeWidth=4;', x, header, faceWidth, rackHeight);
+        for (let u = 1; u <= rack.u_height; u++) {
+          const y = header + rackHeight - u * unit;
+          if (faceIndex === 0) vertex(String(u), 'text;html=1;strokeColor=none;fillColor=none;align=right;fontSize=8;fontColor=#778899;', x - labelWidth, y, labelWidth - 4, unit);
+        }
+        rack.devices.filter(device => device.face === face).forEach(device => {
+          const y = header + rackHeight - (device.position - 1 + device.height) * unit;
+          const h = Math.max(device.height * unit, 4);
+          const value = h >= 31 ? `${device.name}<br><font style="font-size:9px">U${device.position} · ${device.type}</font>` : device.name;
+          vertex(value, `rounded=1;html=1;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=top;spacingLeft=5;spacingTop=2;fillColor=#162e45;strokeColor=${device.color};strokeWidth=2;fontColor=#ffffff;fontSize=11;`, x + 3, y + 1, faceWidth - 6, h - 2);
+        });
+      });
+    });
+    return drawioDocument(cells);
+  };
 
   const buildRackSvg = racks => {
     const unit = 22, faceWidth = 250, labelWidth = 28, faceGap = 28, rackGap = 44, header = 55;
@@ -339,7 +374,7 @@
         });
       });
     });
-    return {svg: svgDocument(width, height, content), width, height};
+    return {svg: svgDocument(width, height, content), drawio: buildRackDrawio(racks), width, height};
   };
 
   const buildTopologySvg = () => {
@@ -347,7 +382,9 @@
     let width = Math.max(root.clientWidth, columns.scrollWidth + 32);
     let height = Math.max(root.clientHeight, columns.scrollHeight + 32);
     const positions = new Map();
+    const nodeCells = new Map();
     let content = '';
+    let drawioCells = '', drawioId = 2;
     root.querySelectorAll('.rack-topology-node').forEach(node => {
       const bounds = node.getBoundingClientRect();
       const x = bounds.left - rootBounds.left + root.scrollLeft;
@@ -356,6 +393,9 @@
       height = Math.max(height, y + bounds.height + 20);
       positions.set(node.dataset.nodeId, {x: x + bounds.width / 2, y: y + bounds.height / 2});
       const color = getComputedStyle(node).getPropertyValue('--node-color').trim() || '#1685fc';
+      const cellId = `node-${drawioId++}`;
+      nodeCells.set(node.dataset.nodeId, cellId);
+      drawioCells += `<mxCell id="${cellId}" value="${xmlEscape(node.querySelector('strong').textContent)}&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;${xmlEscape(node.querySelector('small').textContent)}&lt;/font&gt;" style="rounded=1;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;spacingLeft=8;fillColor=#162e45;strokeColor=${xmlEscape(color)};strokeWidth=2;fontColor=#ffffff;fontSize=12;" vertex="1" parent="1"><mxGeometry x="${x}" y="${y}" width="${bounds.width}" height="${bounds.height}" as="geometry"/></mxCell>`;
       content += `<rect x="${x}" y="${y}" width="${bounds.width}" height="${bounds.height}" rx="6" fill="#162e45" stroke="${xmlEscape(color)}" stroke-width="2"/>`;
       content += `<text x="${x + 10}" y="${y + 20}" fill="#fff" font-family="sans-serif" font-size="12" font-weight="600">${xmlEscape(node.querySelector('strong').textContent)}</text>`;
       content += `<text x="${x + 10}" y="${y + 37}" fill="#cad5df" font-family="sans-serif" font-size="9">${xmlEscape(node.querySelector('small').textContent)}</text>`;
@@ -366,8 +406,12 @@
       if (!a || !b) return;
       const bend = Math.max(30, Math.abs(b.x - a.x) * .35);
       edgeContent += `<path d="M ${a.x} ${a.y} C ${a.x + bend} ${a.y}, ${b.x - bend} ${b.y}, ${b.x} ${b.y}" fill="none" stroke="${xmlEscape(edge.color)}" stroke-width="3"/>`;
+      const sourceId = nodeCells.get(edge.from), targetId = nodeCells.get(edge.to);
+      if (sourceId && targetId) {
+        drawioCells += `<mxCell id="edge-${drawioId++}" value="${xmlEscape(edge.label)}" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeColor=${xmlEscape(edge.color)};strokeWidth=2;fontSize=9;" edge="1" parent="1" source="${sourceId}" target="${targetId}"><mxGeometry relative="1" as="geometry"/></mxCell>`;
+      }
     });
-    return {svg: svgDocument(width, height, edgeContent + content), width, height};
+    return {svg: svgDocument(width, height, edgeContent + content), drawio: drawioDocument(drawioCells), width, height};
   };
 
   const downloadBlob = (blob, filename) => {
@@ -377,7 +421,8 @@
     link.click();
     setTimeout(() => URL.revokeObjectURL(link.href), 1000);
   };
-  const asDrawio = ({svg, width, height}) => {
+  const asDrawio = ({svg, drawio, width, height}) => {
+    if (drawio) return drawio;
     const image = `data:image/svg+xml,${encodeURIComponent(svg)}`;
     return `<mxfile host="app.diagrams.net" type="device"><diagram name="Rack export"><mxGraphModel page="0" background="none"><root><mxCell id="0"/><mxCell id="1" parent="0"/><mxCell id="2" value="" style="shape=image;imageAspect=0;aspect=fixed;image=${xmlEscape(image)};" vertex="1" parent="1"><mxGeometry x="0" y="0" width="${width}" height="${height}" as="geometry"/></mxCell></root></mxGraphModel></diagram></mxfile>`;
   };
