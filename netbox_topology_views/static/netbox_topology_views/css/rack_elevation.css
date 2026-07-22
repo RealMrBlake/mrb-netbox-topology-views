@@ -36,6 +36,7 @@
   justify-content: space-around;
   gap: 5rem;
   min-width: max-content;
+  pointer-events: none;
 }
 .rack-topology-column {
   display: flex;
@@ -53,7 +54,12 @@
   color: inherit;
   text-decoration: none;
   box-shadow: 0 2px 6px rgba(0, 0, 0, .12);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  pointer-events: auto;
 }
+.rack-topology-node.is-dragging { cursor: grabbing; z-index: 5; }
 .rack-topology-node:hover { color: inherit; filter: brightness(.95); }
 .rack-topology-node strong,
 .rack-topology-node small {
@@ -69,4 +75,37 @@
   opacity: .8;
   pointer-events: stroke;
   cursor: pointer;
+  transition: opacity .12s, stroke .12s, filter .12s, stroke-width .12s;
 }
+.rack-topology-edge.is-highlighted {
+  stroke: #fff !important;
+  stroke-width: 5;
+  opacity: 1;
+  filter: drop-shadow(0 0 5px #fff);
+}
+.rack-topology-edge.is-dimmed { opacity: .12; }
+.rack-topology-tooltip {
+  display: none;
+  position: absolute;
+  z-index: 10;
+  width: max-content;
+  max-width: 28rem;
+  padding: .65rem .8rem;
+  border: 1px solid var(--tblr-border-color, #ced4da);
+  border-radius: .35rem;
+  background: var(--tblr-bg-surface, #fff);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, .25);
+  pointer-events: none;
+}
+.rack-topology-tooltip.is-visible { display: block; }
+.rack-topology-tooltip > strong,
+.rack-topology-tooltip > span,
+.rack-topology-tooltip li span,
+.rack-topology-tooltip li small { display: block; }
+.rack-topology-tooltip ul { margin: .4rem 0 0; padding: 0; list-style: none; }
+.rack-topology-tooltip li + li {
+  margin-top: .45rem;
+  padding-top: .45rem;
+  border-top: 1px solid var(--tblr-border-color, #ced4da);
+}
+.rack-topology-tooltip small { opacity: .65; }

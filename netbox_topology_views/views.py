@@ -992,6 +992,8 @@ class RackElevationView(PermissionRequiredMixin, View):
                         if a and b:
                             topology_edges.append({
                                 "from": a["node_id"], "to": b["node_id"],
+                                "from_device": a["device_name"], "to_device": b["device_name"],
+                                "from_port": a["name"], "to_port": b["name"],
                                 "label": cable.label or str(cable),
                                 "color": f"#{cable.color}" if cable.color else "#1685fc",
                                 "url": cable.get_absolute_url(),

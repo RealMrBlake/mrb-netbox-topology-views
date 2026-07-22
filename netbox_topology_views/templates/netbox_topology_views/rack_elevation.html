@@ -69,11 +69,17 @@
 </div>
 
 <div class="card mt-4">
-  <div class="card-header"><strong>Kabeltopologie</strong></div>
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <strong>Kabeltopologie</strong>
+    <button id="rack-topology-reset" class="btn btn-sm btn-outline-secondary" type="button">
+      <i class="mdi mdi-restore"></i> Positionen zurücksetzen
+    </button>
+  </div>
   <div class="card-body">
     <div id="rack-topology" class="rack-topology" aria-label="Topologie der ausgewählten Racks">
       <svg class="rack-topology-lines" aria-hidden="true"></svg>
       <div class="rack-topology-columns"></div>
+      <div class="rack-topology-tooltip" role="tooltip"></div>
     </div>
   </div>
 </div>
@@ -113,6 +119,11 @@
   const data = JSON.parse(source.textContent);
   const columns = root.querySelector('.rack-topology-columns');
   const svg = root.querySelector('svg');
+  const tooltip = root.querySelector('.rack-topology-tooltip');
+  const resetButton = document.getElementById('rack-topology-reset');
+  const storageKey = `netbox-rack-topology:${window.location.pathname}${window.location.search}`;
+  let storedPositions = {};
+  try { storedPositions = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch (_) {}
   const groups = new Map();
 
   data.nodes.forEach(node => {
@@ -132,16 +143,34 @@
       item.className = 'rack-topology-node';
       item.id = `topology-${node.node_id}`;
       item.style.setProperty('--node-color', `#${node.color}`);
+      item.dataset.nodeId = node.node_id;
       if (node.url) item.href = node.url;
       const nameElement = document.createElement('strong');
       nameElement.textContent = node.device_name;
       const portElement = document.createElement('small');
       portElement.textContent = node.name;
       item.append(nameElement, portElement);
+      const saved = storedPositions[node.node_id];
+      if (saved) item.style.transform = `translate(${saved.x}px, ${saved.y}px)`;
       column.appendChild(item);
     });
     columns.appendChild(column);
   });
+
+  const showTooltip = (html, anchor) => {
+    tooltip.innerHTML = html;
+    tooltip.classList.add('is-visible');
+    const rootBounds = root.getBoundingClientRect();
+    const anchorBounds = anchor.getBoundingClientRect();
+    tooltip.style.left = `${anchorBounds.right - rootBounds.left + root.scrollLeft + 10}px`;
+    tooltip.style.top = `${anchorBounds.top - rootBounds.top + root.scrollTop}px`;
+  };
+  const hideTooltip = () => tooltip.classList.remove('is-visible');
+  const escapeHtml = value => {
+    const element = document.createElement('span');
+    element.textContent = value == null ? '—' : String(value);
+    return element.innerHTML;
+  };
 
   const drawEdges = () => {
     const bounds = root.getBoundingClientRect();
@@ -165,13 +194,93 @@
       path.setAttribute('d', `M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}`);
       path.setAttribute('stroke', edge.color);
       path.classList.add('rack-topology-edge');
+      path.dataset.from = edge.from;
+      path.dataset.to = edge.to;
       const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
       title.textContent = edge.label;
       path.appendChild(title);
       if (edge.url) path.addEventListener('click', () => window.location.href = edge.url);
+      path.addEventListener('mouseenter', event => {
+        path.classList.add('is-highlighted');
+        showTooltip(
+          `<strong>${escapeHtml(edge.label)}</strong>` +
+          `<span>${escapeHtml(edge.from_device)} · ${escapeHtml(edge.from_port)}</span>` +
+          `<span>↔ ${escapeHtml(edge.to_device)} · ${escapeHtml(edge.to_port)}</span>`,
+          event.target
+        );
+      });
+      path.addEventListener('mouseleave', () => {
+        path.classList.remove('is-highlighted');
+        hideTooltip();
+      });
       svg.appendChild(path);
     });
   };
+
+  const connectedEdges = nodeId => data.edges.filter(edge => edge.from === nodeId || edge.to === nodeId);
+  root.querySelectorAll('.rack-topology-node').forEach(node => {
+    const nodeId = node.dataset.nodeId;
+    node.addEventListener('mouseenter', () => {
+      const connections = connectedEdges(nodeId);
+      svg.querySelectorAll('.rack-topology-edge').forEach(path => {
+        path.classList.toggle('is-highlighted', path.dataset.from === nodeId || path.dataset.to === nodeId);
+        path.classList.toggle('is-dimmed', path.dataset.from !== nodeId && path.dataset.to !== nodeId);
+      });
+      const rows = connections.map(edge => {
+        const outgoing = edge.from === nodeId;
+        const localPort = outgoing ? edge.from_port : edge.to_port;
+        const remoteDevice = outgoing ? edge.to_device : edge.from_device;
+        const remotePort = outgoing ? edge.to_port : edge.from_port;
+        return `<li><strong>${escapeHtml(localPort)}</strong><span>→ ${escapeHtml(remoteDevice)} · ${escapeHtml(remotePort)}</span><small>${escapeHtml(edge.label)}</small></li>`;
+      }).join('');
+      showTooltip(`<strong>Verbindungen (${connections.length})</strong><ul>${rows || '<li>Keine Verbindungen</li>'}</ul>`, node);
+    });
+    node.addEventListener('mouseleave', () => {
+      svg.querySelectorAll('.rack-topology-edge').forEach(path => path.classList.remove('is-highlighted', 'is-dimmed'));
+      hideTooltip();
+    });
+
+    let drag = null;
+    node.addEventListener('pointerdown', event => {
+      if (event.button !== 0) return;
+      const saved = storedPositions[nodeId] || {x: 0, y: 0};
+      drag = {startX: event.clientX, startY: event.clientY, x: saved.x, y: saved.y, moved: false};
+      node.setPointerCapture(event.pointerId);
+      node.classList.add('is-dragging');
+      event.preventDefault();
+    });
+    node.addEventListener('pointermove', event => {
+      if (!drag) return;
+      const x = drag.x + event.clientX - drag.startX;
+      const y = drag.y + event.clientY - drag.startY;
+      drag.moved ||= Math.abs(x - drag.x) > 3 || Math.abs(y - drag.y) > 3;
+      node.style.transform = `translate(${x}px, ${y}px)`;
+      storedPositions[nodeId] = {x, y};
+      drawEdges();
+    });
+    node.addEventListener('pointerup', event => {
+      if (!drag) return;
+      const moved = drag.moved;
+      drag = null;
+      node.releasePointerCapture(event.pointerId);
+      node.classList.remove('is-dragging');
+      localStorage.setItem(storageKey, JSON.stringify(storedPositions));
+      if (moved) node.dataset.suppressClick = 'true';
+    });
+    node.addEventListener('click', event => {
+      if (node.dataset.suppressClick === 'true') {
+        event.preventDefault();
+        delete node.dataset.suppressClick;
+      }
+    });
+  });
+
+  resetButton?.addEventListener('click', () => {
+    storedPositions = {};
+    localStorage.removeItem(storageKey);
+    root.querySelectorAll('.rack-topology-node').forEach(node => node.style.transform = '');
+    drawEdges();
+  });
   requestAnimationFrame(drawEdges);
   window.addEventListener('resize', drawEdges);
 })();
