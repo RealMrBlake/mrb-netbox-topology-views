@@ -66,7 +66,7 @@ html[data-netbox-color-mode="dark"] .rack-device {
   width: 15rem;
 }
 .rack-topology-column h4 { text-align: center; font-size: .85rem; }
-.rack-topology-device-list { display: flex; flex-direction: column; gap: 20px; }
+.rack-topology-device-list { display: flex; flex-direction: column; gap: 40px; }
 .rack-topology-node {
   display: block;
   padding: .55rem .75rem;
@@ -100,10 +100,10 @@ html[data-netbox-color-mode="dark"] .rack-device {
   transition: opacity .12s, stroke .12s, filter .12s, stroke-width .12s;
 }
 .rack-topology-edge.is-highlighted {
-  stroke: var(--topology-highlight-color, #22c55e) !important;
+  stroke: var(--topology-highlight-color, #16a34a) !important;
   stroke-width: 5;
   opacity: 1;
-  filter: drop-shadow(0 0 5px var(--topology-highlight-color, #22c55e));
+  filter: drop-shadow(0 0 5px var(--topology-highlight-color, #16a34a));
 }
 .rack-topology-edge.is-dimmed { opacity: .12; }
 .rack-topology-edge.is-wireless {

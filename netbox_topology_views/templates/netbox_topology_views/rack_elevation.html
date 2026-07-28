@@ -160,23 +160,32 @@
   const zoomResetButton = document.getElementById('rack-topology-zoom-reset');
   const zoomLabel = document.getElementById('rack-topology-zoom-label');
   let topologyZoom = 1;
-  const activeNetBoxTheme = () => document.body.dataset.bsTheme ||
-    document.documentElement.dataset.bsTheme ||
-    document.documentElement.dataset.netboxColorMode || 'light';
+  const activeNetBoxTheme = () => {
+    for (const element of [topologyCard, document.body, document.documentElement]) {
+      const match = getComputedStyle(element).backgroundColor.match(/[\d.]+/g);
+      if (match && match.length >= 3 && (match.length < 4 || Number(match[3]) > 0)) {
+        const [red, green, blue] = match.map(Number);
+        return (.2126 * red + .7152 * green + .0722 * blue) < 140 ? 'dark' : 'light';
+      }
+    }
+    return document.body.dataset.bsTheme || document.documentElement.dataset.bsTheme || 'light';
+  };
+  const topologyHighlightColor = () => activeNetBoxTheme() === 'dark' ? '#ffffff' : '#16a34a';
   const applyTopologyTheme = () => {
-    root.style.setProperty(
-      '--topology-highlight-color',
-      activeNetBoxTheme() === 'dark' ? '#ffffff' : '#22c55e'
-    );
+    root.style.setProperty('--topology-highlight-color', topologyHighlightColor());
+    root.querySelectorAll('.rack-topology-edge.is-highlighted').forEach(path => {
+      path.style.setProperty('stroke', topologyHighlightColor(), 'important');
+      path.style.setProperty('filter', `drop-shadow(0 0 5px ${topologyHighlightColor()})`, 'important');
+    });
   };
   applyTopologyTheme();
-  const topologyThemeObserver = new MutationObserver(applyTopologyTheme);
+  const topologyThemeObserver = new MutationObserver(() => requestAnimationFrame(applyTopologyTheme));
   topologyThemeObserver.observe(document.body, {attributes: true, attributeFilter: ['data-bs-theme']});
   topologyThemeObserver.observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['data-bs-theme', 'data-netbox-color-mode'],
   });
-  const storageKey = `netbox-rack-topology-v2:${window.location.pathname}${window.location.search}`;
+  const storageKey = `netbox-rack-topology-v3:${window.location.pathname}${window.location.search}`;
   let storedPositions = {};
   try { storedPositions = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch (_) {}
   const groups = new Map();
@@ -199,6 +208,7 @@
     column.appendChild(heading);
     const nodeContainer = document.createElement('div');
     nodeContainer.className = 'rack-topology-device-list';
+    nodeContainer.style.gap = '40px';
     column.appendChild(nodeContainer);
     group.nodes.sort((a, b) => (b.position || 0) - (a.position || 0)).forEach(node => {
       const item = document.createElement(node.url ? 'a' : 'div');
@@ -233,6 +243,16 @@
     element.textContent = value == null ? '—' : String(value);
     return element.innerHTML;
   };
+  const setEdgeHighlighted = (path, highlighted) => {
+    path.classList.toggle('is-highlighted', highlighted);
+    if (highlighted) {
+      path.style.setProperty('stroke', topologyHighlightColor(), 'important');
+      path.style.setProperty('filter', `drop-shadow(0 0 5px ${topologyHighlightColor()})`, 'important');
+    } else {
+      path.style.removeProperty('stroke');
+      path.style.removeProperty('filter');
+    }
+  };
 
   const drawEdges = () => {
     const bounds = root.getBoundingClientRect();
@@ -264,7 +284,7 @@
       path.appendChild(title);
       if (edge.url) path.addEventListener('click', () => window.location.href = edge.url);
       path.addEventListener('mouseenter', event => {
-        path.classList.add('is-highlighted');
+        setEdgeHighlighted(path, true);
         showTooltip(
           `<strong>${isWirelessEdge(edge) ? 'WLAN · ' : ''}${escapeHtml(edge.label)}</strong>` +
           `<span>${escapeHtml(edge.from_device)} · ${escapeHtml(edge.from_port)}</span>` +
@@ -273,7 +293,7 @@
         );
       });
       path.addEventListener('mouseleave', () => {
-        path.classList.remove('is-highlighted');
+        setEdgeHighlighted(path, false);
         hideTooltip();
       });
       svg.appendChild(path);
@@ -286,8 +306,9 @@
     node.addEventListener('mouseenter', () => {
       const connections = connectedEdges(nodeId);
       svg.querySelectorAll('.rack-topology-edge').forEach(path => {
-        path.classList.toggle('is-highlighted', path.dataset.from === nodeId || path.dataset.to === nodeId);
-        path.classList.toggle('is-dimmed', path.dataset.from !== nodeId && path.dataset.to !== nodeId);
+        const connected = path.dataset.from === nodeId || path.dataset.to === nodeId;
+        setEdgeHighlighted(path, connected);
+        path.classList.toggle('is-dimmed', !connected);
       });
       const rows = connections.map(edge => {
         const outgoing = edge.from === nodeId;
@@ -299,7 +320,10 @@
       showTooltip(`<strong>Verbindungen (${connections.length})</strong><ul>${rows || '<li>Keine Verbindungen</li>'}</ul>`, node);
     });
     node.addEventListener('mouseleave', () => {
-      svg.querySelectorAll('.rack-topology-edge').forEach(path => path.classList.remove('is-highlighted', 'is-dimmed'));
+      svg.querySelectorAll('.rack-topology-edge').forEach(path => {
+        setEdgeHighlighted(path, false);
+        path.classList.remove('is-dimmed');
+      });
       hideTooltip();
     });
 

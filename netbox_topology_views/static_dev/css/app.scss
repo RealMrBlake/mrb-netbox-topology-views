@@ -62,7 +62,7 @@ html[data-netbox-color-mode=dark] #visgraph {
 .rack-topology-node strong, .rack-topology-node small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rack-topology-node small { opacity: .7; }
 .rack-topology-edge { fill: none; stroke-width: 3; opacity: .8; pointer-events: stroke; cursor: pointer; transition: opacity .12s, stroke .12s, filter .12s, stroke-width .12s; }
-.rack-topology-edge.is-highlighted { stroke: var(--topology-highlight-color, #22c55e) !important; stroke-width: 5; opacity: 1; filter: drop-shadow(0 0 5px var(--topology-highlight-color, #22c55e)); }
+.rack-topology-edge.is-highlighted { stroke: var(--topology-highlight-color, #16a34a) !important; stroke-width: 5; opacity: 1; filter: drop-shadow(0 0 5px var(--topology-highlight-color, #16a34a)); }
 .rack-topology-edge.is-dimmed { opacity: .12; }
 .rack-topology-tooltip { display: none; position: absolute; z-index: 10; width: max-content; max-width: 28rem; padding: .65rem .8rem; border: 1px solid var(--tblr-border-color, #ced4da); border-radius: .35rem; background: var(--tblr-bg-surface, #fff); box-shadow: 0 4px 18px rgba(0,0,0,.25); pointer-events: none; }
 .rack-topology-tooltip.is-visible { display: block; }
@@ -77,7 +77,7 @@ html[data-netbox-color-mode=dark] #visgraph {
   background-color: #fff;
 }
 
-.rack-topology-device-list { display: flex; flex-direction: column; gap: 20px; }
+.rack-topology-device-list { display: flex; flex-direction: column; gap: 40px; }
 .rack-topology-edge.is-wireless { stroke-dasharray: 7 7; stroke-linecap: round; }
 #rack-topology-card:fullscreen { margin: 0 !important; border: 0; border-radius: 0; background: var(--tblr-bg-surface, #fff); display: flex; flex-direction: column; overflow: hidden; }
 #rack-topology-card:fullscreen .card-body { min-height: 0; flex: 1; overflow: hidden; }
