@@ -161,25 +161,12 @@
 
   groups.forEach(group => {
     const column = document.createElement('section');
-    column.className = `rack-topology-column ${group.rackUnits ? 'is-rack' : 'is-external'}`;
+    column.className = 'rack-topology-column';
     const heading = document.createElement('h4');
     heading.textContent = group.name;
     column.appendChild(heading);
     const nodeContainer = document.createElement('div');
-    nodeContainer.className = group.rackUnits ? 'rack-topology-rack-body' : 'rack-topology-external-body';
-    if (group.rackUnits) {
-      nodeContainer.style.setProperty('--rack-units', group.rackUnits);
-      ['front', 'rear'].forEach(face => {
-        const lane = document.createElement('div');
-        lane.className = `rack-topology-lane is-${face}`;
-        lane.dataset.face = face;
-        const label = document.createElement('span');
-        label.className = 'rack-topology-lane-label';
-        label.textContent = face === 'front' ? 'Vorderseite' : 'Rückseite';
-        lane.appendChild(label);
-        nodeContainer.appendChild(lane);
-      });
-    }
+    nodeContainer.className = 'rack-topology-device-list';
     column.appendChild(nodeContainer);
     group.nodes.sort((a, b) => (b.position || 0) - (a.position || 0)).forEach(node => {
       const item = document.createElement(node.url ? 'a' : 'div');
@@ -193,16 +180,9 @@
       const portElement = document.createElement('small');
       portElement.textContent = node.subtitle || node.name;
       item.append(nameElement, portElement);
-      if (group.rackUnits) {
-        item.style.bottom = `${((node.position || 1) - 1) / group.rackUnits * 100}%`;
-        item.style.height = `${Math.max(node.height || 1, 1) / group.rackUnits * 100}%`;
-      }
       const saved = storedPositions[node.node_id];
       if (saved) item.style.transform = `translate(${saved.x}px, ${saved.y}px)`;
-      const target = group.rackUnits
-        ? nodeContainer.querySelector(`.rack-topology-lane.is-${node.face === 'rear' ? 'rear' : 'front'}`)
-        : nodeContainer;
-      target.appendChild(item);
+      nodeContainer.appendChild(item);
     });
     columns.appendChild(column);
   });
@@ -457,13 +437,6 @@
       const headingY = headingBounds.top - rootBounds.top + root.scrollTop;
       content += `<text x="${headingX + headingBounds.width / 2}" y="${headingY + 15}" text-anchor="middle" fill="${palette.heading}" font-family="sans-serif" font-size="13" font-weight="600">${xmlEscape(heading.textContent)}</text>`;
       drawioCells += `<mxCell id="group-${drawioId++}" value="${xmlEscape(heading.textContent)}" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontStyle=1;fontColor=${palette.heading};" vertex="1" parent="1"><mxGeometry x="${headingX}" y="${headingY}" width="${headingBounds.width}" height="22" as="geometry"/></mxCell>`;
-      column.querySelectorAll('.rack-topology-lane').forEach(lane => {
-        const bounds = lane.getBoundingClientRect();
-        const x = bounds.left - rootBounds.left + root.scrollLeft;
-        const y = bounds.top - rootBounds.top + root.scrollTop;
-        content += `<rect x="${x}" y="${y}" width="${bounds.width}" height="${bounds.height}" fill="none" stroke="${palette.frame}" stroke-width="3"/>`;
-        drawioCells += `<mxCell id="lane-${drawioId++}" value="${xmlEscape(lane.dataset.face === 'rear' ? 'Rückseite' : 'Vorderseite')}" style="rounded=0;html=1;fillColor=none;strokeColor=${palette.frame};strokeWidth=3;verticalAlign=top;fontSize=9;fontColor=${palette.muted};" vertex="1" parent="1"><mxGeometry x="${x}" y="${y}" width="${bounds.width}" height="${bounds.height}" as="geometry"/></mxCell>`;
-      });
     });
     root.querySelectorAll('.rack-topology-node').forEach(node => {
       const bounds = node.getBoundingClientRect();

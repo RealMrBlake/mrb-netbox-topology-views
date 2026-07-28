@@ -15,7 +15,7 @@ Rückseite und Verkabelung.
 - Vorder- und Rückseite eines Racks getrennt betrachten
 - Rackübergreifende und externe Kabelverbindungen erkennen
 - Geräte in der Kabeltopologie frei verschieben
-- Geräte in der Kabeltopologie zunächst entsprechend ihrer Rackposition und Rackseite anordnen
+- Geräte in der Kabeltopologie innerhalb jedes Racks nach ihrer Rackposition sortieren
 - Manuelle Positionen pro Rack-Auswahl im Browser speichern
 - Verbindungen eines Geräts beim Hover weiß hervorheben
 - Alle verbundenen Ports und Gegenstellen eines Geräts anzeigen

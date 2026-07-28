@@ -63,42 +63,10 @@ html[data-netbox-color-mode="dark"] .rack-device {
   display: flex;
   flex-direction: column;
   gap: .75rem;
-  width: 30rem;
+  width: 15rem;
 }
-.rack-topology-column.is-external { width: 15rem; }
 .rack-topology-column h4 { text-align: center; font-size: .85rem; }
-.rack-topology-rack-body {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: .5rem;
-  height: calc(var(--rack-units) * 22px);
-  min-height: 280px;
-  margin-top: 1rem;
-}
-.rack-topology-lane {
-  position: relative;
-  border: 3px solid #718096;
-  background: repeating-linear-gradient(to top, rgba(56, 73, 89, .14) 0, rgba(56, 73, 89, .14) 1px, transparent 1px, transparent calc(100% / var(--rack-units)));
-}
-.rack-topology-lane-label {
-  position: absolute;
-  top: -1.4rem;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: .65rem;
-  text-transform: uppercase;
-}
-.rack-topology-external-body { display: flex; flex-direction: column; gap: .75rem; }
-.rack-topology-lane .rack-topology-node {
-  position: absolute;
-  left: 3px;
-  right: 3px;
-  min-height: 18px;
-  padding: 2px 6px;
-  overflow: hidden;
-  box-sizing: border-box;
-}
+.rack-topology-device-list { display: flex; flex-direction: column; gap: .75rem; }
 .rack-topology-node {
   display: block;
   padding: .55rem .75rem;
@@ -163,10 +131,3 @@ html[data-netbox-color-mode="dark"] .rack-device {
   border-top: 1px solid var(--tblr-border-color, #ced4da);
 }
 .rack-topology-tooltip small { opacity: .65; }
-html[data-bs-theme="dark"] .rack-topology-lane,
-body[data-bs-theme="dark"] .rack-topology-lane,
-html[data-netbox-color-mode="dark"] .rack-topology-lane {
-  border-color: #3b4654;
-  background-color: #212b36;
-  background-image: repeating-linear-gradient(to top, rgba(200, 215, 230, .12) 0, rgba(200, 215, 230, .12) 1px, transparent 1px, transparent calc(100% / var(--rack-units)));
-}
