@@ -15,6 +15,7 @@ Rückseite und Verkabelung.
 - Vorder- und Rückseite eines Racks getrennt betrachten
 - Rackübergreifende und externe Kabelverbindungen erkennen
 - Geräte in der Kabeltopologie frei verschieben
+- Geräte in der Kabeltopologie zunächst entsprechend ihrer Rackposition und Rackseite anordnen
 - Manuelle Positionen pro Rack-Auswahl im Browser speichern
 - Verbindungen eines Geräts beim Hover weiß hervorheben
 - Alle verbundenen Ports und Gegenstellen eines Geräts anzeigen
@@ -22,6 +23,7 @@ Rückseite und Verkabelung.
 - Geräte und Kabel direkt aus der Topologie in NetBox öffnen
 - Einzelne Racks, alle Racks oder die Kabeltopologie als SVG, PNG und draw.io exportieren
 - Exporte grundsätzlich mit transparentem Hintergrund erzeugen
+- Farben von Rackansicht und Export an den aktiven Light- oder Dark-Mode anpassen
 - Topologie als PNG oder diagrams.net/draw.io-XML exportieren
 - Zusätzliche Icons für Network-, Leaf-, Spine- und Aggregation-Switche
 - Unterstützung für helle und dunkle NetBox-Themes

@@ -144,24 +144,44 @@
   const svg = root.querySelector('svg');
   const tooltip = root.querySelector('.rack-topology-tooltip');
   const resetButton = document.getElementById('rack-topology-reset');
-  const storageKey = `netbox-rack-topology:${window.location.pathname}${window.location.search}`;
+  const storageKey = `netbox-rack-topology-v2:${window.location.pathname}${window.location.search}`;
   let storedPositions = {};
   try { storedPositions = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch (_) {}
   const groups = new Map();
 
   data.nodes.forEach(node => {
-    const groupName = node.rack_name || 'Extern';
-    if (!groups.has(groupName)) groups.set(groupName, []);
-    groups.get(groupName).push(node);
+    const groupKey = node.rack_id ? `rack-${node.rack_id}` : 'external';
+    if (!groups.has(groupKey)) groups.set(groupKey, {
+      name: node.rack_name || 'Extern',
+      rackUnits: node.rack_u_height || null,
+      nodes: [],
+    });
+    groups.get(groupKey).nodes.push(node);
   });
 
-  groups.forEach((nodes, name) => {
+  groups.forEach(group => {
     const column = document.createElement('section');
-    column.className = 'rack-topology-column';
+    column.className = `rack-topology-column ${group.rackUnits ? 'is-rack' : 'is-external'}`;
     const heading = document.createElement('h4');
-    heading.textContent = name;
+    heading.textContent = group.name;
     column.appendChild(heading);
-    nodes.forEach(node => {
+    const nodeContainer = document.createElement('div');
+    nodeContainer.className = group.rackUnits ? 'rack-topology-rack-body' : 'rack-topology-external-body';
+    if (group.rackUnits) {
+      nodeContainer.style.setProperty('--rack-units', group.rackUnits);
+      ['front', 'rear'].forEach(face => {
+        const lane = document.createElement('div');
+        lane.className = `rack-topology-lane is-${face}`;
+        lane.dataset.face = face;
+        const label = document.createElement('span');
+        label.className = 'rack-topology-lane-label';
+        label.textContent = face === 'front' ? 'Vorderseite' : 'Rückseite';
+        lane.appendChild(label);
+        nodeContainer.appendChild(lane);
+      });
+    }
+    column.appendChild(nodeContainer);
+    group.nodes.sort((a, b) => (b.position || 0) - (a.position || 0)).forEach(node => {
       const item = document.createElement(node.url ? 'a' : 'div');
       item.className = 'rack-topology-node';
       item.id = `topology-${node.node_id}`;
@@ -171,11 +191,18 @@
       const nameElement = document.createElement('strong');
       nameElement.textContent = node.device_name;
       const portElement = document.createElement('small');
-      portElement.textContent = node.name;
+      portElement.textContent = node.subtitle || node.name;
       item.append(nameElement, portElement);
+      if (group.rackUnits) {
+        item.style.bottom = `${((node.position || 1) - 1) / group.rackUnits * 100}%`;
+        item.style.height = `${Math.max(node.height || 1, 1) / group.rackUnits * 100}%`;
+      }
       const saved = storedPositions[node.node_id];
       if (saved) item.style.transform = `translate(${saved.x}px, ${saved.y}px)`;
-      column.appendChild(item);
+      const target = group.rackUnits
+        ? nodeContainer.querySelector(`.rack-topology-lane.is-${node.face === 'rear' ? 'rear' : 'front'}`)
+        : nodeContainer;
+      target.appendChild(item);
     });
     columns.appendChild(column);
   });
@@ -208,10 +235,10 @@
       const to = document.getElementById(`topology-${edge.to}`);
       if (!from || !to) return;
       const a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
-      const x1 = a.left + a.width / 2 - bounds.left;
-      const y1 = a.top + a.height / 2 - bounds.top;
-      const x2 = b.left + b.width / 2 - bounds.left;
-      const y2 = b.top + b.height / 2 - bounds.top;
+      const x1 = a.left + a.width / 2 - bounds.left + root.scrollLeft;
+      const y1 = a.top + a.height / 2 - bounds.top + root.scrollTop;
+      const x2 = b.left + b.width / 2 - bounds.left + root.scrollLeft;
+      const y2 = b.top + b.height / 2 - bounds.top + root.scrollTop;
       const bend = Math.max(30, Math.abs(x2 - x1) * .35);
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       path.setAttribute('d', `M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}`);
@@ -309,6 +336,19 @@
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;'
   })[char]);
   const safeName = value => String(value || 'export').replace(/[^a-z0-9._-]+/gi, '-').replace(/^-|-$/g, '');
+  const exportPalette = () => {
+    const declaredTheme = document.body.dataset.bsTheme ||
+      document.documentElement.dataset.bsTheme ||
+      document.documentElement.dataset.netboxColorMode || '';
+    const dark = declaredTheme === 'dark' || (!declaredTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    return dark ? {
+      frame: '#52606d', grid: '#667382', heading: '#8fc8ff', muted: '#a9b7c6',
+      deviceFill: '#162e45', deviceText: '#ffffff', deviceSubtext: '#cad5df',
+    } : {
+      frame: '#718096', grid: '#8b99a8', heading: '#0b69b7', muted: '#52606d',
+      deviceFill: '#eef6ff', deviceText: '#132238', deviceSubtext: '#52606d',
+    };
+  };
   const svgDocument = (width, height, content) =>
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${content}</svg>`;
   const drawioDocument = cells =>
@@ -334,6 +374,7 @@
   });
 
   const buildRackDrawio = racks => {
+    const palette = exportPalette();
     const unit = 22, faceWidth = 250, labelWidth = 28, faceGap = 28, rackGap = 44, header = 55;
     const rackWidth = labelWidth + faceWidth * 2 + faceGap;
     let cells = '', cellId = 2;
@@ -345,21 +386,21 @@
     racks.forEach((rack, rackIndex) => {
       const baseX = 10 + rackIndex * (rackWidth + rackGap);
       const rackHeight = rack.u_height * unit;
-      vertex(rack.name, 'text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#1685fc;', baseX, 0, rackWidth, 25);
-      vertex(`${rack.site}${rack.location ? ` · ${rack.location}` : ''} · ${rack.u_height}U`, 'text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontColor=#778899;', baseX, 24, rackWidth, 20);
+      vertex(rack.name, `text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=${palette.heading};`, baseX, 0, rackWidth, 25);
+      vertex(`${rack.site}${rack.location ? ` · ${rack.location}` : ''} · ${rack.u_height}U`, `text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontColor=${palette.muted};`, baseX, 24, rackWidth, 20);
       ['front', 'rear'].forEach((face, faceIndex) => {
         const x = baseX + labelWidth + faceIndex * (faceWidth + faceGap);
-        vertex(face === 'front' ? 'VORDERSEITE' : 'RÜCKSEITE', 'text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#778899;', x, 38, faceWidth, 17);
-        vertex('', 'rounded=0;html=1;fillColor=none;strokeColor=#52606d;strokeWidth=4;', x, header, faceWidth, rackHeight);
+        vertex(face === 'front' ? 'VORDERSEITE' : 'RÜCKSEITE', `text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=${palette.muted};`, x, 38, faceWidth, 17);
+        vertex('', `rounded=0;html=1;fillColor=none;strokeColor=${palette.frame};strokeWidth=4;`, x, header, faceWidth, rackHeight);
         for (let u = 1; u <= rack.u_height; u++) {
           const y = header + rackHeight - u * unit;
-          if (faceIndex === 0) vertex(String(u), 'text;html=1;strokeColor=none;fillColor=none;align=right;fontSize=8;fontColor=#778899;', x - labelWidth, y, labelWidth - 4, unit);
+          if (faceIndex === 0) vertex(String(u), `text;html=1;strokeColor=none;fillColor=none;align=right;fontSize=8;fontColor=${palette.muted};`, x - labelWidth, y, labelWidth - 4, unit);
         }
         rack.devices.filter(device => device.face === face).forEach(device => {
           const y = header + rackHeight - (device.position - 1 + device.height) * unit;
           const h = Math.max(device.height * unit, 4);
           const value = h >= 31 ? `${device.name}<br><font style="font-size:9px">U${device.position} · ${device.type}</font>` : device.name;
-          vertex(value, `rounded=1;html=1;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=top;spacingLeft=5;spacingTop=2;fillColor=#162e45;strokeColor=${device.color};strokeWidth=2;fontColor=#ffffff;fontSize=11;`, x + 3, y + 1, faceWidth - 6, h - 2);
+          vertex(value, `rounded=1;html=1;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=top;spacingLeft=5;spacingTop=2;fillColor=${palette.deviceFill};strokeColor=${device.color};strokeWidth=2;fontColor=${palette.deviceText};fontSize=11;`, x + 3, y + 1, faceWidth - 6, h - 2);
         });
       });
     });
@@ -367,6 +408,7 @@
   };
 
   const buildRackSvg = racks => {
+    const palette = exportPalette();
     const unit = 22, faceWidth = 250, labelWidth = 28, faceGap = 28, rackGap = 44, header = 55;
     const rackWidth = labelWidth + faceWidth * 2 + faceGap;
     const maxUnits = Math.max(...racks.map(rack => rack.u_height || 1), 1);
@@ -376,23 +418,23 @@
     racks.forEach((rack, rackIndex) => {
       const baseX = 10 + rackIndex * (rackWidth + rackGap);
       const rackHeight = rack.u_height * unit;
-      content += `<text x="${baseX}" y="20" fill="#1685fc" font-family="sans-serif" font-size="16" font-weight="700">${xmlEscape(rack.name)}</text>`;
-      content += `<text x="${baseX}" y="39" fill="#778899" font-family="sans-serif" font-size="11">${xmlEscape(rack.site)}${rack.location ? ` · ${xmlEscape(rack.location)}` : ''} · ${rack.u_height}U</text>`;
+      content += `<text x="${baseX}" y="20" fill="${palette.heading}" font-family="sans-serif" font-size="16" font-weight="700">${xmlEscape(rack.name)}</text>`;
+      content += `<text x="${baseX}" y="39" fill="${palette.muted}" font-family="sans-serif" font-size="11">${xmlEscape(rack.site)}${rack.location ? ` · ${xmlEscape(rack.location)}` : ''} · ${rack.u_height}U</text>`;
       ['front', 'rear'].forEach((face, faceIndex) => {
         const x = baseX + labelWidth + faceIndex * (faceWidth + faceGap);
-        content += `<text x="${x + faceWidth / 2}" y="51" text-anchor="middle" fill="#778899" font-family="sans-serif" font-size="10">${face === 'front' ? 'VORDERSEITE' : 'RÜCKSEITE'}</text>`;
-        content += `<rect x="${x}" y="${header}" width="${faceWidth}" height="${rackHeight}" fill="none" stroke="#52606d" stroke-width="4"/>`;
+        content += `<text x="${x + faceWidth / 2}" y="51" text-anchor="middle" fill="${palette.muted}" font-family="sans-serif" font-size="10">${face === 'front' ? 'VORDERSEITE' : 'RÜCKSEITE'}</text>`;
+        content += `<rect x="${x}" y="${header}" width="${faceWidth}" height="${rackHeight}" fill="none" stroke="${palette.frame}" stroke-width="4"/>`;
         for (let u = 1; u <= rack.u_height; u++) {
           const y = header + rackHeight - u * unit;
-          content += `<line x1="${x}" y1="${y}" x2="${x + faceWidth}" y2="${y}" stroke="#667382" stroke-opacity=".35"/>`;
-          if (faceIndex === 0) content += `<text x="${x - 6}" y="${y + 15}" text-anchor="end" fill="#778899" font-family="sans-serif" font-size="9">${u}</text>`;
+          content += `<line x1="${x}" y1="${y}" x2="${x + faceWidth}" y2="${y}" stroke="${palette.grid}" stroke-opacity=".35"/>`;
+          if (faceIndex === 0) content += `<text x="${x - 6}" y="${y + 15}" text-anchor="end" fill="${palette.muted}" font-family="sans-serif" font-size="9">${u}</text>`;
         }
         rack.devices.filter(device => device.face === face).forEach(device => {
           const y = header + rackHeight - (device.position - 1 + device.height) * unit;
           const h = Math.max(device.height * unit, 4);
-          content += `<rect x="${x + 3}" y="${y + 1}" width="${faceWidth - 6}" height="${h - 2}" rx="3" fill="#162e45" stroke="${xmlEscape(device.color)}" stroke-width="2"/>`;
-          if (h >= 13) content += `<text x="${x + 9}" y="${y + Math.min(15, h - 4)}" fill="#fff" font-family="sans-serif" font-size="11" font-weight="600">${xmlEscape(device.name.slice(0, 34))}</text>`;
-          if (h >= 31) content += `<text x="${x + 9}" y="${y + 28}" fill="#cad5df" font-family="sans-serif" font-size="9">U${device.position} · ${xmlEscape(device.type.slice(0, 34))}</text>`;
+          content += `<rect x="${x + 3}" y="${y + 1}" width="${faceWidth - 6}" height="${h - 2}" rx="3" fill="${palette.deviceFill}" stroke="${xmlEscape(device.color)}" stroke-width="2"/>`;
+          if (h >= 13) content += `<text x="${x + 9}" y="${y + Math.min(15, h - 4)}" fill="${palette.deviceText}" font-family="sans-serif" font-size="11" font-weight="600">${xmlEscape(device.name.slice(0, 34))}</text>`;
+          if (h >= 31) content += `<text x="${x + 9}" y="${y + 28}" fill="${palette.deviceSubtext}" font-family="sans-serif" font-size="9">U${device.position} · ${xmlEscape(device.type.slice(0, 34))}</text>`;
         });
       });
     });
@@ -400,6 +442,7 @@
   };
 
   const buildTopologySvg = () => {
+    const palette = exportPalette();
     const rootBounds = root.getBoundingClientRect();
     let width = Math.max(root.clientWidth, columns.scrollWidth + 32);
     let height = Math.max(root.clientHeight, columns.scrollHeight + 32);
@@ -407,6 +450,21 @@
     const nodeCells = new Map();
     let content = '';
     let drawioCells = '', drawioId = 2;
+    root.querySelectorAll('.rack-topology-column').forEach(column => {
+      const heading = column.querySelector('h4');
+      const headingBounds = heading.getBoundingClientRect();
+      const headingX = headingBounds.left - rootBounds.left + root.scrollLeft;
+      const headingY = headingBounds.top - rootBounds.top + root.scrollTop;
+      content += `<text x="${headingX + headingBounds.width / 2}" y="${headingY + 15}" text-anchor="middle" fill="${palette.heading}" font-family="sans-serif" font-size="13" font-weight="600">${xmlEscape(heading.textContent)}</text>`;
+      drawioCells += `<mxCell id="group-${drawioId++}" value="${xmlEscape(heading.textContent)}" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontStyle=1;fontColor=${palette.heading};" vertex="1" parent="1"><mxGeometry x="${headingX}" y="${headingY}" width="${headingBounds.width}" height="22" as="geometry"/></mxCell>`;
+      column.querySelectorAll('.rack-topology-lane').forEach(lane => {
+        const bounds = lane.getBoundingClientRect();
+        const x = bounds.left - rootBounds.left + root.scrollLeft;
+        const y = bounds.top - rootBounds.top + root.scrollTop;
+        content += `<rect x="${x}" y="${y}" width="${bounds.width}" height="${bounds.height}" fill="none" stroke="${palette.frame}" stroke-width="3"/>`;
+        drawioCells += `<mxCell id="lane-${drawioId++}" value="${xmlEscape(lane.dataset.face === 'rear' ? 'Rückseite' : 'Vorderseite')}" style="rounded=0;html=1;fillColor=none;strokeColor=${palette.frame};strokeWidth=3;verticalAlign=top;fontSize=9;fontColor=${palette.muted};" vertex="1" parent="1"><mxGeometry x="${x}" y="${y}" width="${bounds.width}" height="${bounds.height}" as="geometry"/></mxCell>`;
+      });
+    });
     root.querySelectorAll('.rack-topology-node').forEach(node => {
       const bounds = node.getBoundingClientRect();
       const x = bounds.left - rootBounds.left + root.scrollLeft;
@@ -417,10 +475,10 @@
       const color = getComputedStyle(node).getPropertyValue('--node-color').trim() || '#1685fc';
       const cellId = `node-${drawioId++}`;
       nodeCells.set(node.dataset.nodeId, cellId);
-      drawioCells += `<mxCell id="${cellId}" value="${xmlEscape(node.querySelector('strong').textContent)}&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;${xmlEscape(node.querySelector('small').textContent)}&lt;/font&gt;" style="rounded=1;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;spacingLeft=8;fillColor=#162e45;strokeColor=${xmlEscape(color)};strokeWidth=2;fontColor=#ffffff;fontSize=12;" vertex="1" parent="1"><mxGeometry x="${x}" y="${y}" width="${bounds.width}" height="${bounds.height}" as="geometry"/></mxCell>`;
-      content += `<rect x="${x}" y="${y}" width="${bounds.width}" height="${bounds.height}" rx="6" fill="#162e45" stroke="${xmlEscape(color)}" stroke-width="2"/>`;
-      content += `<text x="${x + 10}" y="${y + 20}" fill="#fff" font-family="sans-serif" font-size="12" font-weight="600">${xmlEscape(node.querySelector('strong').textContent)}</text>`;
-      content += `<text x="${x + 10}" y="${y + 37}" fill="#cad5df" font-family="sans-serif" font-size="9">${xmlEscape(node.querySelector('small').textContent)}</text>`;
+      drawioCells += `<mxCell id="${cellId}" value="${xmlEscape(node.querySelector('strong').textContent)}&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;${xmlEscape(node.querySelector('small').textContent)}&lt;/font&gt;" style="rounded=1;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;spacingLeft=8;fillColor=${palette.deviceFill};strokeColor=${xmlEscape(color)};strokeWidth=2;fontColor=${palette.deviceText};fontSize=12;" vertex="1" parent="1"><mxGeometry x="${x}" y="${y}" width="${bounds.width}" height="${bounds.height}" as="geometry"/></mxCell>`;
+      content += `<rect x="${x}" y="${y}" width="${bounds.width}" height="${bounds.height}" rx="6" fill="${palette.deviceFill}" stroke="${xmlEscape(color)}" stroke-width="2"/>`;
+      content += `<text x="${x + 10}" y="${y + 20}" fill="${palette.deviceText}" font-family="sans-serif" font-size="12" font-weight="600">${xmlEscape(node.querySelector('strong').textContent)}</text>`;
+      content += `<text x="${x + 10}" y="${y + 37}" fill="${palette.deviceSubtext}" font-family="sans-serif" font-size="9">${xmlEscape(node.querySelector('small').textContent)}</text>`;
     });
     let edgeContent = '';
     data.edges.forEach(edge => {
@@ -483,6 +541,7 @@
   }));
   requestAnimationFrame(drawEdges);
   window.addEventListener('resize', drawEdges);
+  root.addEventListener('scroll', drawEdges, {passive: true});
 })();
 </script>
 {% endblock %}

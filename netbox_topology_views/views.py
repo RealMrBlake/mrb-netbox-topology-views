@@ -927,6 +927,11 @@ def _rack_endpoint(termination):
         "rack_name": getattr(getattr(device, "rack", None), "name", None) or "Extern",
         "url": device.get_absolute_url() if device else None,
         "color": getattr(getattr(device, "role", None), "color", None) or "1685fc",
+        "position": float(device.position or 1) if device else None,
+        "height": max(getattr(getattr(device, "device_type", None), "u_height", 1) or 1, 1) if device else 1,
+        "face": str(device.face or "front").lower() if device else "front",
+        "rack_u_height": getattr(getattr(device, "rack", None), "u_height", None),
+        "subtitle": str(device.device_type) if device else getattr(termination, "name", str(termination)),
     }
 
 
@@ -987,7 +992,21 @@ class RackElevationView(PermissionRequiredMixin, View):
             })
 
         cable_rows = []
-        topology_nodes = {}
+        topology_nodes = {
+            f"device-{device.pk}": {
+                "node_id": f"device-{device.pk}", "device_id": device.pk,
+                "device_name": device.name or str(device.device_type),
+                "name": "", "subtitle": str(device.device_type),
+                "rack_id": device.rack_id, "rack_name": device.rack.name,
+                "url": device.get_absolute_url(),
+                "color": str(device.role.color or "1685fc"),
+                "position": float(device.position or 1),
+                "height": max(device.device_type.u_height or 1, 1),
+                "face": device.elevation_face,
+                "rack_u_height": device.rack.u_height,
+            }
+            for rack in rack_list for device in rack.elevation_devices
+        }
         topology_edges = []
         if device_ids:
             cable_ids = CableTermination.objects.filter(
@@ -1003,7 +1022,7 @@ class RackElevationView(PermissionRequiredMixin, View):
                         cable_rows.append({"cable": cable, "a": a, "b": b})
                         for endpoint in (a, b):
                             if endpoint:
-                                topology_nodes[endpoint["node_id"]] = endpoint
+                                topology_nodes.setdefault(endpoint["node_id"], endpoint)
                         if a and b:
                             topology_edges.append({
                                 "from": a["node_id"], "to": b["node_id"],
