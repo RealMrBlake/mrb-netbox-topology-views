@@ -210,8 +210,8 @@
     nodeContainer.className = 'rack-topology-device-list';
     nodeContainer.style.display = 'flex';
     nodeContainer.style.flexDirection = 'column';
-    nodeContainer.style.gap = '40px';
-    nodeContainer.style.rowGap = '40px';
+    nodeContainer.style.gap = '20px';
+    nodeContainer.style.rowGap = '20px';
     column.appendChild(nodeContainer);
     group.nodes.sort((a, b) => (b.position || 0) - (a.position || 0)).forEach(node => {
       const item = document.createElement(node.url ? 'a' : 'div');
