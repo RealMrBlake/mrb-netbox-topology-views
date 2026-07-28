@@ -160,6 +160,22 @@
   const zoomResetButton = document.getElementById('rack-topology-zoom-reset');
   const zoomLabel = document.getElementById('rack-topology-zoom-label');
   let topologyZoom = 1;
+  const activeNetBoxTheme = () => document.body.dataset.bsTheme ||
+    document.documentElement.dataset.bsTheme ||
+    document.documentElement.dataset.netboxColorMode || 'light';
+  const applyTopologyTheme = () => {
+    root.style.setProperty(
+      '--topology-highlight-color',
+      activeNetBoxTheme() === 'dark' ? '#ffffff' : '#22c55e'
+    );
+  };
+  applyTopologyTheme();
+  const topologyThemeObserver = new MutationObserver(applyTopologyTheme);
+  topologyThemeObserver.observe(document.body, {attributes: true, attributeFilter: ['data-bs-theme']});
+  topologyThemeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-bs-theme', 'data-netbox-color-mode'],
+  });
   const storageKey = `netbox-rack-topology-v2:${window.location.pathname}${window.location.search}`;
   let storedPositions = {};
   try { storedPositions = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch (_) {}
@@ -354,9 +370,7 @@
   })[char]);
   const safeName = value => String(value || 'export').replace(/[^a-z0-9._-]+/gi, '-').replace(/^-|-$/g, '');
   const exportPalette = () => {
-    const declaredTheme = document.body.dataset.bsTheme ||
-      document.documentElement.dataset.bsTheme ||
-      document.documentElement.dataset.netboxColorMode || '';
+    const declaredTheme = activeNetBoxTheme();
     const dark = declaredTheme === 'dark' || (!declaredTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
     return dark ? {
       frame: '#52606d', grid: '#667382', heading: '#8fc8ff', muted: '#a9b7c6',
