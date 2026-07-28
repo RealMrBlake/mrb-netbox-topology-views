@@ -66,7 +66,7 @@ html[data-netbox-color-mode="dark"] .rack-device {
   width: 15rem;
 }
 .rack-topology-column h4 { text-align: center; font-size: .85rem; }
-.rack-topology-device-list { display: flex; flex-direction: column; gap: .75rem; }
+.rack-topology-device-list { display: flex; flex-direction: column; gap: 14px; }
 .rack-topology-node {
   display: block;
   padding: .55rem .75rem;
@@ -106,6 +106,18 @@ html[data-netbox-color-mode="dark"] .rack-device {
   filter: drop-shadow(0 0 5px #fff);
 }
 .rack-topology-edge.is-dimmed { opacity: .12; }
+.rack-topology-edge.is-wireless {
+  stroke-dasharray: 7 7;
+  stroke-linecap: round;
+}
+#rack-topology-card:fullscreen {
+  margin: 0 !important;
+  border: 0;
+  border-radius: 0;
+  background: var(--tblr-bg-surface, #fff);
+}
+#rack-topology-card:fullscreen .card-body { min-height: 0; flex: 1; }
+#rack-topology-card:fullscreen .rack-topology { height: calc(100vh - 5.5rem); }
 .rack-topology-tooltip {
   display: none;
   position: absolute;

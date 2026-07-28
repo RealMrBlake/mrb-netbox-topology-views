@@ -1017,7 +1017,29 @@ class RackElevationView(PermissionRequiredMixin, View):
                                 "label": cable.label or str(cable),
                                 "color": f"#{cable.color}" if cable.color else "#1685fc",
                                 "url": cable.get_absolute_url(),
+                                "kind": "cable",
                             })
+
+            wireless_links = WirelessLink.objects.restrict(request.user, "view").filter(
+                Q(_interface_a_device_id__in=device_ids) |
+                Q(_interface_b_device_id__in=device_ids)
+            ).select_related(
+                "interface_a__device__rack", "interface_a__device__role", "interface_a__device__device_type",
+                "interface_b__device__rack", "interface_b__device__role", "interface_b__device__device_type",
+            )
+            for wireless_link in wireless_links:
+                a = _rack_endpoint(wireless_link.interface_a)
+                b = _rack_endpoint(wireless_link.interface_b)
+                topology_nodes[a["node_id"]] = a
+                topology_nodes[b["node_id"]] = b
+                topology_edges.append({
+                    "from": a["node_id"], "to": b["node_id"],
+                    "from_device": a["device_name"], "to_device": b["device_name"],
+                    "from_port": a["name"], "to_port": b["name"],
+                    "label": wireless_link.ssid or str(wireless_link),
+                    "color": "#8b5cf6", "url": wireless_link.get_absolute_url(),
+                    "kind": "wireless",
+                })
 
         return render(request, "netbox_topology_views/rack_elevation.html", {
             "filter_form": RackElevationFilterForm(request.GET or None),

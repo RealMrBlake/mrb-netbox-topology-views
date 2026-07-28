@@ -82,7 +82,7 @@
   {% endfor %}
 </div>
 
-<div class="card mt-4">
+<div id="rack-topology-card" class="card mt-4">
   <div class="card-header d-flex justify-content-between align-items-center">
     <strong>Kabeltopologie</strong>
     <div class="d-flex gap-2">
@@ -93,6 +93,9 @@
       </div>
       <button id="rack-topology-reset" class="btn btn-sm btn-outline-secondary" type="button">
         <i class="mdi mdi-restore"></i> Positionen zurücksetzen
+      </button>
+      <button id="rack-topology-fullscreen" class="btn btn-sm btn-outline-secondary" type="button">
+        <i class="mdi mdi-fullscreen"></i> Vollbild
       </button>
     </div>
   </div>
@@ -144,6 +147,8 @@
   const svg = root.querySelector('svg');
   const tooltip = root.querySelector('.rack-topology-tooltip');
   const resetButton = document.getElementById('rack-topology-reset');
+  const fullscreenButton = document.getElementById('rack-topology-fullscreen');
+  const topologyCard = document.getElementById('rack-topology-card');
   const storageKey = `netbox-rack-topology-v2:${window.location.pathname}${window.location.search}`;
   let storedPositions = {};
   try { storedPositions = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch (_) {}
@@ -224,6 +229,7 @@
       path.setAttribute('d', `M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}`);
       path.setAttribute('stroke', edge.color);
       path.classList.add('rack-topology-edge');
+      if (edge.kind === 'wireless') path.classList.add('is-wireless');
       path.dataset.from = edge.from;
       path.dataset.to = edge.to;
       const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
@@ -233,7 +239,7 @@
       path.addEventListener('mouseenter', event => {
         path.classList.add('is-highlighted');
         showTooltip(
-          `<strong>${escapeHtml(edge.label)}</strong>` +
+          `<strong>${edge.kind === 'wireless' ? 'WLAN · ' : ''}${escapeHtml(edge.label)}</strong>` +
           `<span>${escapeHtml(edge.from_device)} · ${escapeHtml(edge.from_port)}</span>` +
           `<span>↔ ${escapeHtml(edge.to_device)} · ${escapeHtml(edge.to_port)}</span>`,
           event.target
@@ -261,7 +267,7 @@
         const localPort = outgoing ? edge.from_port : edge.to_port;
         const remoteDevice = outgoing ? edge.to_device : edge.from_device;
         const remotePort = outgoing ? edge.to_port : edge.from_port;
-        return `<li><strong>${escapeHtml(localPort)}</strong><span>→ ${escapeHtml(remoteDevice)} · ${escapeHtml(remotePort)}</span><small>${escapeHtml(edge.label)}</small></li>`;
+        return `<li><strong>${escapeHtml(localPort)}</strong><span>→ ${escapeHtml(remoteDevice)} · ${escapeHtml(remotePort)}</span><small>${edge.kind === 'wireless' ? 'WLAN · ' : ''}${escapeHtml(edge.label)}</small></li>`;
       }).join('');
       showTooltip(`<strong>Verbindungen (${connections.length})</strong><ul>${rows || '<li>Keine Verbindungen</li>'}</ul>`, node);
     });
@@ -310,6 +316,17 @@
     localStorage.removeItem(storageKey);
     root.querySelectorAll('.rack-topology-node').forEach(node => node.style.transform = '');
     drawEdges();
+  });
+  fullscreenButton?.addEventListener('click', async () => {
+    if (document.fullscreenElement === topologyCard) await document.exitFullscreen();
+    else await topologyCard.requestFullscreen();
+  });
+  document.addEventListener('fullscreenchange', () => {
+    const active = document.fullscreenElement === topologyCard;
+    fullscreenButton.innerHTML = active
+      ? '<i class="mdi mdi-fullscreen-exit"></i> Vollbild verlassen'
+      : '<i class="mdi mdi-fullscreen"></i> Vollbild';
+    requestAnimationFrame(drawEdges);
   });
 
   const xmlEscape = value => String(value ?? '').replace(/[&<>"']/g, char => ({
@@ -458,10 +475,10 @@
       const a = positions.get(edge.from), b = positions.get(edge.to);
       if (!a || !b) return;
       const bend = Math.max(30, Math.abs(b.x - a.x) * .35);
-      edgeContent += `<path d="M ${a.x} ${a.y} C ${a.x + bend} ${a.y}, ${b.x - bend} ${b.y}, ${b.x} ${b.y}" fill="none" stroke="${xmlEscape(edge.color)}" stroke-width="3"/>`;
+      edgeContent += `<path d="M ${a.x} ${a.y} C ${a.x + bend} ${a.y}, ${b.x - bend} ${b.y}, ${b.x} ${b.y}" fill="none" stroke="${xmlEscape(edge.color)}" stroke-width="3"${edge.kind === 'wireless' ? ' stroke-dasharray="7 7"' : ''}/>`;
       const sourceId = nodeCells.get(edge.from), targetId = nodeCells.get(edge.to);
       if (sourceId && targetId) {
-        drawioCells += `<mxCell id="edge-${drawioId++}" value="${xmlEscape(edge.label)}" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeColor=${xmlEscape(edge.color)};strokeWidth=2;fontSize=9;" edge="1" parent="1" source="${sourceId}" target="${targetId}"><mxGeometry relative="1" as="geometry"/></mxCell>`;
+        drawioCells += `<mxCell id="edge-${drawioId++}" value="${xmlEscape(edge.kind === 'wireless' ? `WLAN · ${edge.label}` : edge.label)}" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeColor=${xmlEscape(edge.color)};strokeWidth=2;fontSize=9;${edge.kind === 'wireless' ? 'dashed=1;dashPattern=7 7;' : ''}" edge="1" parent="1" source="${sourceId}" target="${targetId}"><mxGeometry relative="1" as="geometry"/></mxCell>`;
       }
     });
     return {svg: svgDocument(width, height, edgeContent + content), drawio: drawioDocument(drawioCells), width, height};

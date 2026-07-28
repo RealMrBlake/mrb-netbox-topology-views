@@ -76,7 +76,11 @@ html[data-netbox-color-mode=dark] #visgraph {
   background-color: #fff;
 }
 
-.rack-topology-device-list { display: flex; flex-direction: column; gap: .75rem; }
+.rack-topology-device-list { display: flex; flex-direction: column; gap: 14px; }
+.rack-topology-edge.is-wireless { stroke-dasharray: 7 7; stroke-linecap: round; }
+#rack-topology-card:fullscreen { margin: 0 !important; border: 0; border-radius: 0; background: var(--tblr-bg-surface, #fff); }
+#rack-topology-card:fullscreen .card-body { min-height: 0; flex: 1; }
+#rack-topology-card:fullscreen .rack-topology { height: calc(100vh - 5.5rem); }
 
 html[data-bs-theme="dark"], body[data-bs-theme="dark"], html[data-netbox-color-mode="dark"] {
   .rack-frame { border-color: #3b4654; background-color: #212b36; }

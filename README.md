@@ -16,6 +16,8 @@ Rückseite und Verkabelung.
 - Rackübergreifende und externe Kabelverbindungen erkennen
 - Geräte in der Kabeltopologie frei verschieben
 - Geräte in der Kabeltopologie innerhalb jedes Racks nach ihrer Rackposition sortieren
+- Kabeltopologie in den Browser-Vollbildmodus schalten
+- WLAN-Verbindungen als violette, gestrichelte Funkstrecken darstellen
 - Manuelle Positionen pro Rack-Auswahl im Browser speichern
 - Verbindungen eines Geräts beim Hover weiß hervorheben
 - Alle verbundenen Ports und Gegenstellen eines Geräts anzeigen
