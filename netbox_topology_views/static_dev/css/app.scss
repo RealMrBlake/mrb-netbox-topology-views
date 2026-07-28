@@ -70,6 +70,7 @@ html[data-netbox-color-mode=dark] #visgraph {
 .rack-topology-tooltip ul { margin: .4rem 0 0; padding: 0; list-style: none; }
 .rack-topology-tooltip li + li { margin-top: .45rem; padding-top: .45rem; border-top: 1px solid var(--tblr-border-color, #ced4da); }
 .rack-topology-tooltip small { opacity: .65; }
+.rack-cable-count { min-width: 2rem; margin-left: .35rem; background-color: #52606d !important; color: #fff !important; text-align: center; }
 
 .rack-frame {
   border-color: #718096;

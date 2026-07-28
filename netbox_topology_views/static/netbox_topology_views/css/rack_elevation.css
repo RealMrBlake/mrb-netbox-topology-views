@@ -146,3 +146,10 @@ html[data-netbox-color-mode="dark"] .rack-device {
   border-top: 1px solid var(--tblr-border-color, #ced4da);
 }
 .rack-topology-tooltip small { opacity: .65; }
+.rack-cable-count {
+  min-width: 2rem;
+  margin-left: .35rem;
+  background-color: #52606d !important;
+  color: #fff !important;
+  text-align: center;
+}

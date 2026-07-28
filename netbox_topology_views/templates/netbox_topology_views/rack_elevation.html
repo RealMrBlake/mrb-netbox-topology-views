@@ -116,7 +116,7 @@
 {{ rack_export|json_script:"rack-export-data" }}
 
 <div class="card mt-4">
-  <div class="card-header"><strong>Verkabelung der angezeigten Racks</strong> <span class="badge bg-secondary">{{ cables|length }}</span></div>
+  <div class="card-header"><strong>Verkabelung der angezeigten Racks</strong> <span class="badge rack-cable-count">{{ cables|length }}</span></div>
   <div class="table-responsive">
     <table class="table table-hover mb-0">
       <thead><tr><th>Kabel</th><th>A-Seite</th><th>B-Seite</th><th>Typ</th><th>Status</th></tr></thead>
