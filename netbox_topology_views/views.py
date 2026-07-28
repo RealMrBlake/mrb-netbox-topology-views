@@ -27,7 +27,7 @@ from django.http import HttpRequest, HttpResponseRedirect, QueryDict
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import View
 from extras.models import Tag, SavedFilter
-from wireless.models import WirelessLink
+from wireless.models import WirelessLAN, WirelessLink
 from netbox.views.generic import (
     ObjectView, 
     ObjectListView, 
@@ -1021,8 +1021,8 @@ class RackElevationView(PermissionRequiredMixin, View):
                             })
 
             wireless_links = WirelessLink.objects.restrict(request.user, "view").filter(
-                Q(_interface_a_device_id__in=device_ids) |
-                Q(_interface_b_device_id__in=device_ids)
+                Q(interface_a__device_id__in=device_ids) |
+                Q(interface_b__device_id__in=device_ids)
             ).select_related(
                 "interface_a__device__rack", "interface_a__device__role", "interface_a__device__device_type",
                 "interface_b__device__rack", "interface_b__device__role", "interface_b__device__device_type",
@@ -1040,6 +1040,34 @@ class RackElevationView(PermissionRequiredMixin, View):
                     "color": "#8b5cf6", "url": wireless_link.get_absolute_url(),
                     "kind": "wireless",
                 })
+
+            wireless_lans = WirelessLAN.objects.restrict(request.user, "view").filter(
+                interfaces__device_id__in=device_ids
+            ).distinct()
+            for wireless_lan in wireless_lans:
+                wlan_node_id = f"wlan-{wireless_lan.pk}"
+                topology_nodes[wlan_node_id] = {
+                    "node_id": wlan_node_id, "device_id": None,
+                    "device_name": f"WLAN · {wireless_lan.ssid}",
+                    "name": wireless_lan.ssid, "subtitle": "Multi-Access WLAN",
+                    "rack_id": None, "rack_name": "Funknetze",
+                    "url": wireless_lan.get_absolute_url(), "color": "8b5cf6",
+                    "position": None, "height": 1, "face": "front", "rack_u_height": None,
+                }
+                wlan_interfaces = Interface.objects.restrict(request.user, "view").filter(
+                    wireless_lans=wireless_lan
+                ).select_related("device__rack", "device__role", "device__device_type")
+                for interface in wlan_interfaces:
+                    endpoint = _rack_endpoint(interface)
+                    topology_nodes[endpoint["node_id"]] = endpoint
+                    topology_edges.append({
+                        "from": endpoint["node_id"], "to": wlan_node_id,
+                        "from_device": endpoint["device_name"],
+                        "to_device": f"WLAN · {wireless_lan.ssid}",
+                        "from_port": endpoint["name"], "to_port": wireless_lan.ssid,
+                        "label": wireless_lan.ssid, "color": "#8b5cf6",
+                        "url": wireless_lan.get_absolute_url(), "kind": "wireless-lan",
+                    })
 
         return render(request, "netbox_topology_views/rack_elevation.html", {
             "filter_form": RackElevationFilterForm(request.GET or None),

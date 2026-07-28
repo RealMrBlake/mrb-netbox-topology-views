@@ -91,6 +91,11 @@
         <button class="btn btn-sm btn-outline-primary topology-export" data-format="png">PNG</button>
         <button class="btn btn-sm btn-outline-primary topology-export" data-format="drawio">draw.io</button>
       </div>
+      <div class="btn-group" aria-label="Topologie zoomen">
+        <button id="rack-topology-zoom-out" class="btn btn-sm btn-outline-secondary" type="button" title="Verkleinern"><i class="mdi mdi-minus"></i></button>
+        <button id="rack-topology-zoom-reset" class="btn btn-sm btn-outline-secondary" type="button" title="Zoom zurücksetzen"><span id="rack-topology-zoom-label">100%</span></button>
+        <button id="rack-topology-zoom-in" class="btn btn-sm btn-outline-secondary" type="button" title="Vergrößern"><i class="mdi mdi-plus"></i></button>
+      </div>
       <button id="rack-topology-reset" class="btn btn-sm btn-outline-secondary" type="button">
         <i class="mdi mdi-restore"></i> Positionen zurücksetzen
       </button>
@@ -142,6 +147,7 @@
   const source = document.getElementById('rack-topology-data');
   if (!root || !source) return;
   const data = JSON.parse(source.textContent);
+  const isWirelessEdge = edge => edge.kind === 'wireless' || edge.kind === 'wireless-lan';
   const rackData = JSON.parse(document.getElementById('rack-export-data').textContent);
   const columns = root.querySelector('.rack-topology-columns');
   const svg = root.querySelector('svg');
@@ -149,13 +155,18 @@
   const resetButton = document.getElementById('rack-topology-reset');
   const fullscreenButton = document.getElementById('rack-topology-fullscreen');
   const topologyCard = document.getElementById('rack-topology-card');
+  const zoomInButton = document.getElementById('rack-topology-zoom-in');
+  const zoomOutButton = document.getElementById('rack-topology-zoom-out');
+  const zoomResetButton = document.getElementById('rack-topology-zoom-reset');
+  const zoomLabel = document.getElementById('rack-topology-zoom-label');
+  let topologyZoom = 1;
   const storageKey = `netbox-rack-topology-v2:${window.location.pathname}${window.location.search}`;
   let storedPositions = {};
   try { storedPositions = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch (_) {}
   const groups = new Map();
 
   data.nodes.forEach(node => {
-    const groupKey = node.rack_id ? `rack-${node.rack_id}` : 'external';
+    const groupKey = node.rack_id ? `rack-${node.rack_id}` : `external-${node.rack_name || 'Extern'}`;
     if (!groups.has(groupKey)) groups.set(groupKey, {
       name: node.rack_name || 'Extern',
       rackUnits: node.rack_u_height || null,
@@ -209,8 +220,8 @@
 
   const drawEdges = () => {
     const bounds = root.getBoundingClientRect();
-    let width = Math.max(root.clientWidth, columns.scrollWidth + 32);
-    let height = Math.max(root.clientHeight, columns.scrollHeight + 32);
+    let width = Math.max(root.clientWidth, columns.scrollWidth * topologyZoom + 32);
+    let height = Math.max(root.clientHeight, columns.scrollHeight * topologyZoom + 32);
     svg.style.width = `${width}px`;
     svg.style.height = `${height}px`;
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
@@ -229,7 +240,7 @@
       path.setAttribute('d', `M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}`);
       path.setAttribute('stroke', edge.color);
       path.classList.add('rack-topology-edge');
-      if (edge.kind === 'wireless') path.classList.add('is-wireless');
+      if (isWirelessEdge(edge)) path.classList.add('is-wireless');
       path.dataset.from = edge.from;
       path.dataset.to = edge.to;
       const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
@@ -239,7 +250,7 @@
       path.addEventListener('mouseenter', event => {
         path.classList.add('is-highlighted');
         showTooltip(
-          `<strong>${edge.kind === 'wireless' ? 'WLAN · ' : ''}${escapeHtml(edge.label)}</strong>` +
+          `<strong>${isWirelessEdge(edge) ? 'WLAN · ' : ''}${escapeHtml(edge.label)}</strong>` +
           `<span>${escapeHtml(edge.from_device)} · ${escapeHtml(edge.from_port)}</span>` +
           `<span>↔ ${escapeHtml(edge.to_device)} · ${escapeHtml(edge.to_port)}</span>`,
           event.target
@@ -267,7 +278,7 @@
         const localPort = outgoing ? edge.from_port : edge.to_port;
         const remoteDevice = outgoing ? edge.to_device : edge.from_device;
         const remotePort = outgoing ? edge.to_port : edge.from_port;
-        return `<li><strong>${escapeHtml(localPort)}</strong><span>→ ${escapeHtml(remoteDevice)} · ${escapeHtml(remotePort)}</span><small>${edge.kind === 'wireless' ? 'WLAN · ' : ''}${escapeHtml(edge.label)}</small></li>`;
+        return `<li><strong>${escapeHtml(localPort)}</strong><span>→ ${escapeHtml(remoteDevice)} · ${escapeHtml(remotePort)}</span><small>${isWirelessEdge(edge) ? 'WLAN · ' : ''}${escapeHtml(edge.label)}</small></li>`;
       }).join('');
       showTooltip(`<strong>Verbindungen (${connections.length})</strong><ul>${rows || '<li>Keine Verbindungen</li>'}</ul>`, node);
     });
@@ -287,8 +298,8 @@
     });
     node.addEventListener('pointermove', event => {
       if (!drag) return;
-      const x = drag.x + event.clientX - drag.startX;
-      const y = drag.y + event.clientY - drag.startY;
+      const x = drag.x + (event.clientX - drag.startX) / topologyZoom;
+      const y = drag.y + (event.clientY - drag.startY) / topologyZoom;
       drag.moved ||= Math.abs(x - drag.x) > 3 || Math.abs(y - drag.y) > 3;
       node.style.transform = `translate(${x}px, ${y}px)`;
       storedPositions[nodeId] = {x, y};
@@ -328,6 +339,15 @@
       : '<i class="mdi mdi-fullscreen"></i> Vollbild';
     requestAnimationFrame(drawEdges);
   });
+  const setTopologyZoom = value => {
+    topologyZoom = Math.min(2, Math.max(.5, Math.round(value * 10) / 10));
+    columns.style.zoom = topologyZoom;
+    zoomLabel.textContent = `${Math.round(topologyZoom * 100)}%`;
+    requestAnimationFrame(drawEdges);
+  };
+  zoomInButton?.addEventListener('click', () => setTopologyZoom(topologyZoom + .1));
+  zoomOutButton?.addEventListener('click', () => setTopologyZoom(topologyZoom - .1));
+  zoomResetButton?.addEventListener('click', () => setTopologyZoom(1));
 
   const xmlEscape = value => String(value ?? '').replace(/[&<>"']/g, char => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;'
@@ -441,8 +461,8 @@
   const buildTopologySvg = () => {
     const palette = exportPalette();
     const rootBounds = root.getBoundingClientRect();
-    let width = Math.max(root.clientWidth, columns.scrollWidth + 32);
-    let height = Math.max(root.clientHeight, columns.scrollHeight + 32);
+    let width = Math.max(root.clientWidth, columns.scrollWidth * topologyZoom + 32);
+    let height = Math.max(root.clientHeight, columns.scrollHeight * topologyZoom + 32);
     const positions = new Map();
     const nodeCells = new Map();
     let content = '';
@@ -475,10 +495,10 @@
       const a = positions.get(edge.from), b = positions.get(edge.to);
       if (!a || !b) return;
       const bend = Math.max(30, Math.abs(b.x - a.x) * .35);
-      edgeContent += `<path d="M ${a.x} ${a.y} C ${a.x + bend} ${a.y}, ${b.x - bend} ${b.y}, ${b.x} ${b.y}" fill="none" stroke="${xmlEscape(edge.color)}" stroke-width="3"${edge.kind === 'wireless' ? ' stroke-dasharray="7 7"' : ''}/>`;
+      edgeContent += `<path d="M ${a.x} ${a.y} C ${a.x + bend} ${a.y}, ${b.x - bend} ${b.y}, ${b.x} ${b.y}" fill="none" stroke="${xmlEscape(edge.color)}" stroke-width="3"${isWirelessEdge(edge) ? ' stroke-dasharray="7 7"' : ''}/>`;
       const sourceId = nodeCells.get(edge.from), targetId = nodeCells.get(edge.to);
       if (sourceId && targetId) {
-        drawioCells += `<mxCell id="edge-${drawioId++}" value="${xmlEscape(edge.kind === 'wireless' ? `WLAN · ${edge.label}` : edge.label)}" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeColor=${xmlEscape(edge.color)};strokeWidth=2;fontSize=9;${edge.kind === 'wireless' ? 'dashed=1;dashPattern=7 7;' : ''}" edge="1" parent="1" source="${sourceId}" target="${targetId}"><mxGeometry relative="1" as="geometry"/></mxCell>`;
+        drawioCells += `<mxCell id="edge-${drawioId++}" value="${xmlEscape(isWirelessEdge(edge) ? `WLAN · ${edge.label}` : edge.label)}" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeColor=${xmlEscape(edge.color)};strokeWidth=2;fontSize=9;${isWirelessEdge(edge) ? 'dashed=1;dashPattern=7 7;' : ''}" edge="1" parent="1" source="${sourceId}" target="${targetId}"><mxGeometry relative="1" as="geometry"/></mxCell>`;
       }
     });
     return {svg: svgDocument(width, height, edgeContent + content), drawio: drawioDocument(drawioCells), width, height};

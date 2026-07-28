@@ -37,7 +37,7 @@ html[data-netbox-color-mode="dark"] .rack-device {
 .rack-topology {
   position: relative;
   min-height: 18rem;
-  overflow-x: auto;
+  overflow: auto;
   padding: 1rem;
   background: var(--tblr-bg-surface-secondary, rgba(127, 127, 127, .05));
 }
@@ -66,7 +66,7 @@ html[data-netbox-color-mode="dark"] .rack-device {
   width: 15rem;
 }
 .rack-topology-column h4 { text-align: center; font-size: .85rem; }
-.rack-topology-device-list { display: flex; flex-direction: column; gap: 14px; }
+.rack-topology-device-list { display: flex; flex-direction: column; gap: 20px; }
 .rack-topology-node {
   display: block;
   padding: .55rem .75rem;
@@ -115,8 +115,11 @@ html[data-netbox-color-mode="dark"] .rack-device {
   border: 0;
   border-radius: 0;
   background: var(--tblr-bg-surface, #fff);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
-#rack-topology-card:fullscreen .card-body { min-height: 0; flex: 1; }
+#rack-topology-card:fullscreen .card-body { min-height: 0; flex: 1; overflow: hidden; }
 #rack-topology-card:fullscreen .rack-topology { height: calc(100vh - 5.5rem); }
 .rack-topology-tooltip {
   display: none;

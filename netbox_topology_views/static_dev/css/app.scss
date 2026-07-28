@@ -51,7 +51,7 @@ html[data-netbox-color-mode=dark] #visgraph {
 .rack-device:hover span { white-space: normal; }
 .rack-device span, .rack-device small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rack-device small { font-size: .6rem; opacity: .8; }
-.rack-topology { position: relative; min-height: 18rem; overflow-x: auto; padding: 1rem; background: var(--tblr-bg-surface-secondary, rgba(127,127,127,.05)); }
+.rack-topology { position: relative; min-height: 18rem; overflow: auto; padding: 1rem; background: var(--tblr-bg-surface-secondary, rgba(127,127,127,.05)); }
 .rack-topology-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
 .rack-topology-columns { position: relative; z-index: 2; display: flex; align-items: flex-start; justify-content: space-around; gap: 5rem; min-width: max-content; pointer-events: none; }
 .rack-topology-column { display: flex; flex-direction: column; gap: .75rem; width: 15rem; }
@@ -76,10 +76,10 @@ html[data-netbox-color-mode=dark] #visgraph {
   background-color: #fff;
 }
 
-.rack-topology-device-list { display: flex; flex-direction: column; gap: 14px; }
+.rack-topology-device-list { display: flex; flex-direction: column; gap: 20px; }
 .rack-topology-edge.is-wireless { stroke-dasharray: 7 7; stroke-linecap: round; }
-#rack-topology-card:fullscreen { margin: 0 !important; border: 0; border-radius: 0; background: var(--tblr-bg-surface, #fff); }
-#rack-topology-card:fullscreen .card-body { min-height: 0; flex: 1; }
+#rack-topology-card:fullscreen { margin: 0 !important; border: 0; border-radius: 0; background: var(--tblr-bg-surface, #fff); display: flex; flex-direction: column; overflow: hidden; }
+#rack-topology-card:fullscreen .card-body { min-height: 0; flex: 1; overflow: hidden; }
 #rack-topology-card:fullscreen .rack-topology { height: calc(100vh - 5.5rem); }
 
 html[data-bs-theme="dark"], body[data-bs-theme="dark"], html[data-netbox-color-mode="dark"] {

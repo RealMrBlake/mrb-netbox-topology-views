@@ -17,7 +17,9 @@ Rückseite und Verkabelung.
 - Geräte in der Kabeltopologie frei verschieben
 - Geräte in der Kabeltopologie innerhalb jedes Racks nach ihrer Rackposition sortieren
 - Kabeltopologie in den Browser-Vollbildmodus schalten
-- WLAN-Verbindungen als violette, gestrichelte Funkstrecken darstellen
+- Kabeltopologie zwischen 50 und 200 Prozent zoomen und im Vollbild scrollen
+- Geräte in der Kabeltopologie mit rund 5 mm Abstand darstellen
+- P2P-WirelessLinks und Multi-Access-WLANs als violette, gestrichelte Funkstrecken darstellen
 - Manuelle Positionen pro Rack-Auswahl im Browser speichern
 - Verbindungen eines Geräts beim Hover weiß hervorheben
 - Alle verbundenen Ports und Gegenstellen eines Geräts anzeigen
