@@ -13,6 +13,7 @@ Rückseite und Verkabelung.
 - Ein oder mehrere Racks gemeinsam anzeigen
 - Geräte positionsgenau anhand ihrer Höheneinheiten darstellen
 - Vorder- und Rückseite eines Racks getrennt betrachten
+- Auf- und absteigende HE-Nummerierung sowie individuelle Start-HE automatisch berücksichtigen
 - Rackübergreifende und externe Kabelverbindungen erkennen
 - Geräte in der Kabeltopologie frei verschieben
 - Geräte in der Kabeltopologie innerhalb jedes Racks nach ihrer Rackposition sortieren

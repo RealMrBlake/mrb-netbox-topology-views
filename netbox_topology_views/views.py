@@ -928,9 +928,11 @@ def _rack_endpoint(termination):
         "url": device.get_absolute_url() if device else None,
         "color": getattr(getattr(device, "role", None), "color", None) or "1685fc",
         "position": float(device.position or 1) if device else None,
-        "height": max(getattr(getattr(device, "device_type", None), "u_height", 1) or 1, 1) if device else 1,
+        "height": float(max(getattr(getattr(device, "device_type", None), "u_height", 1) or 1, 1)) if device else 1,
         "face": str(device.face or "front").lower() if device else "front",
         "rack_u_height": getattr(getattr(device, "rack", None), "u_height", None),
+        "rack_desc_units": getattr(getattr(device, "rack", None), "desc_units", False),
+        "rack_starting_unit": getattr(getattr(device, "rack", None), "starting_unit", 1),
         "subtitle": str(device.device_type) if device else getattr(termination, "name", str(termination)),
     }
 
@@ -965,27 +967,42 @@ class RackElevationView(PermissionRequiredMixin, View):
         device_ids = []
         for device in devices.filter(rack_id__in=rack_ids).order_by("rack_id", "position", "name"):
             device_ids.append(device.pk)
-            height = max(getattr(device.device_type, "u_height", 1) or 1, 1)
+            height = float(max(getattr(device.device_type, "u_height", 1) or 1, 1))
             rack_height = max(device.rack.u_height or 1, 1)
-            device.elevation_bottom = f"{(float(device.position or 1) - 1) / rack_height * 100:.4f}"
+            rack_start = float(device.rack.starting_unit or 1)
+            position_offset = float(device.position or rack_start) - rack_start
+            if device.rack.desc_units:
+                bottom_units = rack_height - position_offset - height
+            else:
+                bottom_units = position_offset
+            device.elevation_bottom = f"{max(bottom_units, 0) / rack_height * 100:.4f}"
             device.elevation_height = f"{min(height / rack_height * 100, 100):.4f}"
             device.elevation_face = str(device.face or "front").lower()
             rack_devices[device.rack_id].append(device)
 
         for rack in rack_list:
             rack.elevation_devices = rack_devices[rack.pk]
-            rack.elevation_unit_labels = range(rack.u_height or 0, 0, -1)
+            rack_start = rack.starting_unit or 1
+            if rack.desc_units:
+                rack.elevation_unit_labels = range(rack_start, rack_start + (rack.u_height or 0))
+            else:
+                rack.elevation_unit_labels = range(
+                    rack_start + (rack.u_height or 0) - 1,
+                    rack_start - 1,
+                    -1,
+                )
 
         rack_export = []
         for rack in rack_list:
             rack_export.append({
                 "id": rack.pk, "name": rack.name, "u_height": rack.u_height,
+                "starting_unit": rack.starting_unit, "desc_units": rack.desc_units,
                 "site": str(rack.site), "location": str(rack.location or ""),
                 "devices": [{
                     "name": device.name or str(device.device_type),
                     "type": str(device.device_type),
                     "position": float(device.position or 1),
-                    "height": max(device.device_type.u_height or 1, 1),
+                    "height": float(max(device.device_type.u_height or 1, 1)),
                     "face": device.elevation_face,
                     "color": f"#{device.role.color}" if device.role.color else "#1685fc",
                 } for device in rack.elevation_devices],

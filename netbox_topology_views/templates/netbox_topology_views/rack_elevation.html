@@ -195,6 +195,7 @@
     if (!groups.has(groupKey)) groups.set(groupKey, {
       name: node.rack_name || 'Extern',
       rackUnits: node.rack_u_height || null,
+      descUnits: Boolean(node.rack_desc_units),
       nodes: [],
     });
     groups.get(groupKey).nodes.push(node);
@@ -213,7 +214,10 @@
     nodeContainer.style.gap = '40px';
     nodeContainer.style.rowGap = '40px';
     column.appendChild(nodeContainer);
-    group.nodes.sort((a, b) => (b.position || 0) - (a.position || 0)).forEach(node => {
+    group.nodes.sort((a, b) => group.descUnits
+      ? (a.position || 0) - (b.position || 0)
+      : (b.position || 0) - (a.position || 0)
+    ).forEach(node => {
       const item = document.createElement(node.url ? 'a' : 'div');
       item.className = 'rack-topology-node';
       item.id = `topology-${node.node_id}`;
@@ -419,11 +423,16 @@
     const devices = Array.from(card.querySelectorAll('.rack-device')).map(device => {
       const bottom = Number.parseFloat(device.style.bottom) || 0;
       const height = Number.parseFloat(device.style.height) || (100 / rackUnits);
+      const deviceHeight = Math.max(height / 100 * rackUnits, 1);
+      const bottomUnits = bottom / 100 * rackUnits;
+      const startingUnit = Number(rack.starting_unit) || 1;
       return {
         name: device.dataset.deviceName || device.querySelector('span')?.textContent || 'Gerät',
         type: device.dataset.deviceType || '',
-        position: bottom / 100 * rackUnits + 1,
-        height: Math.max(height / 100 * rackUnits, 1),
+        position: rack.desc_units
+          ? startingUnit + rackUnits - deviceHeight - bottomUnits
+          : startingUnit + bottomUnits,
+        height: deviceHeight,
         face: device.dataset.face === 'rear' ? 'rear' : 'front',
         color: device.dataset.deviceColor || '#1685fc',
       };
@@ -444,18 +453,23 @@
     racks.forEach((rack, rackIndex) => {
       const baseX = 10 + rackIndex * (rackWidth + rackGap);
       const rackHeight = rack.u_height * unit;
+      const startingUnit = Number(rack.starting_unit) || 1;
       vertex(rack.name, `text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=${palette.heading};`, baseX, 0, rackWidth, 25);
       vertex(`${rack.site}${rack.location ? ` · ${rack.location}` : ''} · ${rack.u_height}U`, `text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontColor=${palette.muted};`, baseX, 24, rackWidth, 20);
       ['front', 'rear'].forEach((face, faceIndex) => {
         const x = baseX + labelWidth + faceIndex * (faceWidth + faceGap);
         vertex(face === 'front' ? 'VORDERSEITE' : 'RÜCKSEITE', `text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=${palette.muted};`, x, 38, faceWidth, 17);
         vertex('', `rounded=0;html=1;fillColor=none;strokeColor=${palette.frame};strokeWidth=4;`, x, header, faceWidth, rackHeight);
-        for (let u = 1; u <= rack.u_height; u++) {
-          const y = header + rackHeight - u * unit;
-          if (faceIndex === 0) vertex(String(u), `text;html=1;strokeColor=none;fillColor=none;align=right;fontSize=8;fontColor=${palette.muted};`, x - labelWidth, y, labelWidth - 4, unit);
+        for (let row = 0; row < rack.u_height; row++) {
+          const y = header + row * unit;
+          const unitLabel = rack.desc_units ? startingUnit + row : startingUnit + rack.u_height - 1 - row;
+          if (faceIndex === 0) vertex(String(unitLabel), `text;html=1;strokeColor=none;fillColor=none;align=right;fontSize=8;fontColor=${palette.muted};`, x - labelWidth, y, labelWidth - 4, unit);
         }
         rack.devices.filter(device => device.face === face).forEach(device => {
-          const y = header + rackHeight - (device.position - 1 + device.height) * unit;
+          const positionOffset = device.position - startingUnit;
+          const y = rack.desc_units
+            ? header + positionOffset * unit
+            : header + rackHeight - (positionOffset + device.height) * unit;
           const h = Math.max(device.height * unit, 4);
           const value = h >= 31 ? `${device.name}<br><font style="font-size:9px">U${device.position} · ${device.type}</font>` : device.name;
           vertex(value, `rounded=1;html=1;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=top;spacingLeft=5;spacingTop=2;fillColor=${palette.deviceFill};strokeColor=${device.color};strokeWidth=2;fontColor=${palette.deviceText};fontSize=11;`, x + 3, y + 1, faceWidth - 6, h - 2);
@@ -476,19 +490,24 @@
     racks.forEach((rack, rackIndex) => {
       const baseX = 10 + rackIndex * (rackWidth + rackGap);
       const rackHeight = rack.u_height * unit;
+      const startingUnit = Number(rack.starting_unit) || 1;
       content += `<text x="${baseX}" y="20" fill="${palette.heading}" font-family="sans-serif" font-size="16" font-weight="700">${xmlEscape(rack.name)}</text>`;
       content += `<text x="${baseX}" y="39" fill="${palette.muted}" font-family="sans-serif" font-size="11">${xmlEscape(rack.site)}${rack.location ? ` · ${xmlEscape(rack.location)}` : ''} · ${rack.u_height}U</text>`;
       ['front', 'rear'].forEach((face, faceIndex) => {
         const x = baseX + labelWidth + faceIndex * (faceWidth + faceGap);
         content += `<text x="${x + faceWidth / 2}" y="51" text-anchor="middle" fill="${palette.muted}" font-family="sans-serif" font-size="10">${face === 'front' ? 'VORDERSEITE' : 'RÜCKSEITE'}</text>`;
         content += `<rect x="${x}" y="${header}" width="${faceWidth}" height="${rackHeight}" fill="none" stroke="${palette.frame}" stroke-width="4"/>`;
-        for (let u = 1; u <= rack.u_height; u++) {
-          const y = header + rackHeight - u * unit;
+        for (let row = 0; row < rack.u_height; row++) {
+          const y = header + row * unit;
+          const unitLabel = rack.desc_units ? startingUnit + row : startingUnit + rack.u_height - 1 - row;
           content += `<line x1="${x}" y1="${y}" x2="${x + faceWidth}" y2="${y}" stroke="${palette.grid}" stroke-opacity=".35"/>`;
-          if (faceIndex === 0) content += `<text x="${x - 6}" y="${y + 15}" text-anchor="end" fill="${palette.muted}" font-family="sans-serif" font-size="9">${u}</text>`;
+          if (faceIndex === 0) content += `<text x="${x - 6}" y="${y + 15}" text-anchor="end" fill="${palette.muted}" font-family="sans-serif" font-size="9">${unitLabel}</text>`;
         }
         rack.devices.filter(device => device.face === face).forEach(device => {
-          const y = header + rackHeight - (device.position - 1 + device.height) * unit;
+          const positionOffset = device.position - startingUnit;
+          const y = rack.desc_units
+            ? header + positionOffset * unit
+            : header + rackHeight - (positionOffset + device.height) * unit;
           const h = Math.max(device.height * unit, 4);
           content += `<rect x="${x + 3}" y="${y + 1}" width="${faceWidth - 6}" height="${h - 2}" rx="3" fill="${palette.deviceFill}" stroke="${xmlEscape(device.color)}" stroke-width="2"/>`;
           if (h >= 13) content += `<text x="${x + 9}" y="${y + Math.min(15, h - 4)}" fill="${palette.deviceText}" font-family="sans-serif" font-size="11" font-weight="600">${xmlEscape(device.name.slice(0, 34))}</text>`;
