@@ -1044,9 +1044,12 @@ class RackElevationView(PermissionRequiredMixin, View):
                                 "kind": "power" if is_power_cable else "cable",
                             })
 
+            wireless_device_ids = set(device_ids) | {
+                node["device_id"] for node in topology_nodes.values() if node.get("device_id")
+            }
             wireless_links = WirelessLink.objects.restrict(request.user, "view").filter(
-                Q(interface_a__device_id__in=device_ids) |
-                Q(interface_b__device_id__in=device_ids)
+                Q(interface_a__device_id__in=wireless_device_ids) |
+                Q(interface_b__device_id__in=wireless_device_ids)
             ).select_related(
                 "interface_a__device__rack", "interface_a__device__role", "interface_a__device__device_type",
                 "interface_b__device__rack", "interface_b__device__role", "interface_b__device__device_type",
