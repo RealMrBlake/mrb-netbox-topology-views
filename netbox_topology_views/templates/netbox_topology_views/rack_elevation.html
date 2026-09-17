@@ -85,7 +85,17 @@
 <div id="rack-topology-card" class="card mt-4">
   <div class="card-header d-flex justify-content-between align-items-center">
     <strong>Kabeltopologie</strong>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 align-items-center">
+      <div class="d-flex gap-3 align-items-center rack-topology-kind-toggles">
+        <div class="form-check form-check-inline mb-0">
+          <input class="form-check-input" type="checkbox" id="rack-topology-show-wireless" checked>
+          <label class="form-check-label" for="rack-topology-show-wireless">Funk/WLAN</label>
+        </div>
+        <div class="form-check form-check-inline mb-0">
+          <input class="form-check-input" type="checkbox" id="rack-topology-show-power" checked>
+          <label class="form-check-label" for="rack-topology-show-power">Strom</label>
+        </div>
+      </div>
       <div class="btn-group">
         <button class="btn btn-sm btn-outline-primary topology-export" data-format="svg">SVG</button>
         <button class="btn btn-sm btn-outline-primary topology-export" data-format="png">PNG</button>
@@ -149,6 +159,22 @@
   const data = JSON.parse(source.textContent);
   const isWirelessEdge = edge => edge.kind === 'wireless' || edge.kind === 'wireless-lan';
   const isPowerEdge = edge => edge.kind === 'power';
+  const showWirelessCheckbox = document.getElementById('rack-topology-show-wireless');
+  const showPowerCheckbox = document.getElementById('rack-topology-show-power');
+  const isEdgeVisible = edge => {
+    if (isWirelessEdge(edge)) return showWirelessCheckbox ? showWirelessCheckbox.checked : true;
+    if (isPowerEdge(edge)) return showPowerCheckbox ? showPowerCheckbox.checked : true;
+    return true;
+  };
+  const applyKindVisibility = () => {
+    const showWireless = showWirelessCheckbox ? showWirelessCheckbox.checked : true;
+    root.querySelectorAll('.rack-topology-node').forEach(node => {
+      if (node.dataset.kind === 'wireless-lan') {
+        node.style.display = showWireless ? '' : 'none';
+      }
+    });
+    drawEdges();
+  };
   const rackData = JSON.parse(document.getElementById('rack-export-data').textContent);
   const columns = root.querySelector('.rack-topology-columns');
   const svg = root.querySelector('svg');
@@ -224,6 +250,7 @@
       item.id = `topology-${node.node_id}`;
       item.style.setProperty('--node-color', `#${node.color}`);
       item.dataset.nodeId = node.node_id;
+      if (node.kind) item.dataset.kind = node.kind;
       if (node.url) item.href = node.url;
       const nameElement = document.createElement('strong');
       nameElement.textContent = node.device_name;
@@ -271,6 +298,7 @@
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
     svg.replaceChildren();
     data.edges.forEach(edge => {
+      if (!isEdgeVisible(edge)) return;
       const from = document.getElementById(`topology-${edge.from}`);
       const to = document.getElementById(`topology-${edge.to}`);
       if (!from || !to) return;
@@ -309,7 +337,7 @@
     });
   };
 
-  const connectedEdges = nodeId => data.edges.filter(edge => edge.from === nodeId || edge.to === nodeId);
+  const connectedEdges = nodeId => data.edges.filter(edge => isEdgeVisible(edge) && (edge.from === nodeId || edge.to === nodeId));
   root.querySelectorAll('.rack-topology-node').forEach(node => {
     const nodeId = node.dataset.nodeId;
     node.addEventListener('mouseenter', () => {
@@ -538,6 +566,7 @@
       drawioCells += `<mxCell id="group-${drawioId++}" value="${xmlEscape(heading.textContent)}" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontStyle=1;fontColor=${palette.heading};" vertex="1" parent="1"><mxGeometry x="${headingX}" y="${headingY}" width="${headingBounds.width}" height="22" as="geometry"/></mxCell>`;
     });
     root.querySelectorAll('.rack-topology-node').forEach(node => {
+      if (node.style.display === 'none') return;
       const bounds = node.getBoundingClientRect();
       const x = bounds.left - rootBounds.left + root.scrollLeft;
       const y = bounds.top - rootBounds.top + root.scrollTop;
@@ -554,6 +583,7 @@
     });
     let edgeContent = '';
     data.edges.forEach(edge => {
+      if (!isEdgeVisible(edge)) return;
       const a = positions.get(edge.from), b = positions.get(edge.to);
       if (!a || !b) return;
       const bend = Math.max(30, Math.abs(b.x - a.x) * .35);
@@ -613,7 +643,9 @@
   document.querySelectorAll('.topology-export').forEach(button => button.addEventListener('click', () => {
     exportGraphic(buildTopologySvg(), button.dataset.format, 'rack-topologie');
   }));
-  requestAnimationFrame(drawEdges);
+  showWirelessCheckbox?.addEventListener('change', applyKindVisibility);
+  showPowerCheckbox?.addEventListener('change', applyKindVisibility);
+  requestAnimationFrame(applyKindVisibility);
   window.addEventListener('resize', drawEdges);
   root.addEventListener('scroll', drawEdges, {passive: true});
 })();

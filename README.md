@@ -127,7 +127,7 @@ sudo systemctl restart netbox netbox-rq
 ```
 
 `--force-reinstall` ist derzeit sinnvoll, da der Fork intern noch die
-Paketversion `4.5.1` verwendet.
+Paketversion `4.5.2` verwendet.
 
 ## Verwendung
 

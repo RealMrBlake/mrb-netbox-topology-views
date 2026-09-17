@@ -1009,13 +1009,7 @@ class RackElevationView(PermissionRequiredMixin, View):
                 } for device in rack.elevation_devices],
             })
 
-        def _flag_enabled(name):
-            if not request.GET:
-                return True
-            return request.GET.get(name) in ("on", "True", "true", "1")
-
-        show_wireless = _flag_enabled("show_wireless")
-        show_power = _flag_enabled("show_power")
+        power_component_models = {"powerport", "poweroutlet", "powerfeed"}
 
         cable_rows = []
         topology_nodes = {}
@@ -1026,10 +1020,10 @@ class RackElevationView(PermissionRequiredMixin, View):
             ).values_list("cable_id", flat=True).distinct()
             cables = Cable.objects.restrict(request.user, "view").filter(pk__in=cable_ids)
             for cable in cables.order_by("label", "pk"):
-                is_power_cable = cable.type == CableTypeChoices.TYPE_POWER
-                if is_power_cable and not show_power:
-                    continue
                 a_terms, b_terms = list(cable.a_terminations), list(cable.b_terminations)
+                is_power_cable = cable.type == CableTypeChoices.TYPE_POWER or any(
+                    term._meta.model_name in power_component_models for term in a_terms + b_terms
+                )
                 for index in range(max(len(a_terms), len(b_terms), 1)):
                     a = _rack_endpoint(a_terms[index]) if index < len(a_terms) else None
                     b = _rack_endpoint(b_terms[index]) if index < len(b_terms) else None
@@ -1050,55 +1044,55 @@ class RackElevationView(PermissionRequiredMixin, View):
                                 "kind": "power" if is_power_cable else "cable",
                             })
 
-            if show_wireless:
-                wireless_links = WirelessLink.objects.restrict(request.user, "view").filter(
-                    Q(interface_a__device_id__in=device_ids) |
-                    Q(interface_b__device_id__in=device_ids)
-                ).select_related(
-                    "interface_a__device__rack", "interface_a__device__role", "interface_a__device__device_type",
-                    "interface_b__device__rack", "interface_b__device__role", "interface_b__device__device_type",
-                )
-                for wireless_link in wireless_links:
-                    a = _rack_endpoint(wireless_link.interface_a)
-                    b = _rack_endpoint(wireless_link.interface_b)
-                    topology_nodes[a["node_id"]] = a
-                    topology_nodes[b["node_id"]] = b
-                    topology_edges.append({
-                        "from": a["node_id"], "to": b["node_id"],
-                        "from_device": a["device_name"], "to_device": b["device_name"],
-                        "from_port": a["name"], "to_port": b["name"],
-                        "label": wireless_link.ssid or str(wireless_link),
-                        "color": "#8b5cf6", "url": wireless_link.get_absolute_url(),
-                        "kind": "wireless",
-                    })
+            wireless_links = WirelessLink.objects.restrict(request.user, "view").filter(
+                Q(interface_a__device_id__in=device_ids) |
+                Q(interface_b__device_id__in=device_ids)
+            ).select_related(
+                "interface_a__device__rack", "interface_a__device__role", "interface_a__device__device_type",
+                "interface_b__device__rack", "interface_b__device__role", "interface_b__device__device_type",
+            )
+            for wireless_link in wireless_links:
+                a = _rack_endpoint(wireless_link.interface_a)
+                b = _rack_endpoint(wireless_link.interface_b)
+                topology_nodes[a["node_id"]] = a
+                topology_nodes[b["node_id"]] = b
+                topology_edges.append({
+                    "from": a["node_id"], "to": b["node_id"],
+                    "from_device": a["device_name"], "to_device": b["device_name"],
+                    "from_port": a["name"], "to_port": b["name"],
+                    "label": wireless_link.ssid or str(wireless_link),
+                    "color": "#8b5cf6", "url": wireless_link.get_absolute_url(),
+                    "kind": "wireless",
+                })
 
-                wireless_lans = WirelessLAN.objects.restrict(request.user, "view").filter(
-                    interfaces__device_id__in=device_ids
-                ).distinct()
-                for wireless_lan in wireless_lans:
-                    wlan_node_id = f"wlan-{wireless_lan.pk}"
-                    topology_nodes[wlan_node_id] = {
-                        "node_id": wlan_node_id, "device_id": None,
-                        "device_name": f"WLAN · {wireless_lan.ssid}",
-                        "name": wireless_lan.ssid, "subtitle": "Multi-Access WLAN",
-                        "rack_id": None, "rack_name": "Funknetze",
-                        "url": wireless_lan.get_absolute_url(), "color": "8b5cf6",
-                        "position": None, "height": 1, "face": "front", "rack_u_height": None,
-                    }
-                    wlan_interfaces = Interface.objects.restrict(request.user, "view").filter(
-                        wireless_lans=wireless_lan
-                    ).select_related("device__rack", "device__role", "device__device_type")
-                    for interface in wlan_interfaces:
-                        endpoint = _rack_endpoint(interface)
-                        topology_nodes[endpoint["node_id"]] = endpoint
-                        topology_edges.append({
-                            "from": endpoint["node_id"], "to": wlan_node_id,
-                            "from_device": endpoint["device_name"],
-                            "to_device": f"WLAN · {wireless_lan.ssid}",
-                            "from_port": endpoint["name"], "to_port": wireless_lan.ssid,
-                            "label": wireless_lan.ssid, "color": "#8b5cf6",
-                            "url": wireless_lan.get_absolute_url(), "kind": "wireless-lan",
-                        })
+            wireless_lans = WirelessLAN.objects.restrict(request.user, "view").filter(
+                interfaces__device_id__in=device_ids
+            ).distinct()
+            for wireless_lan in wireless_lans:
+                wlan_node_id = f"wlan-{wireless_lan.pk}"
+                topology_nodes[wlan_node_id] = {
+                    "node_id": wlan_node_id, "device_id": None,
+                    "device_name": f"WLAN · {wireless_lan.ssid}",
+                    "name": wireless_lan.ssid, "subtitle": "Multi-Access WLAN",
+                    "rack_id": None, "rack_name": "Funknetze",
+                    "url": wireless_lan.get_absolute_url(), "color": "8b5cf6",
+                    "position": None, "height": 1, "face": "front", "rack_u_height": None,
+                    "kind": "wireless-lan",
+                }
+                wlan_interfaces = Interface.objects.restrict(request.user, "view").filter(
+                    wireless_lans=wireless_lan
+                ).select_related("device__rack", "device__role", "device__device_type")
+                for interface in wlan_interfaces:
+                    endpoint = _rack_endpoint(interface)
+                    topology_nodes[endpoint["node_id"]] = endpoint
+                    topology_edges.append({
+                        "from": endpoint["node_id"], "to": wlan_node_id,
+                        "from_device": endpoint["device_name"],
+                        "to_device": f"WLAN · {wireless_lan.ssid}",
+                        "from_port": endpoint["name"], "to_port": wireless_lan.ssid,
+                        "label": wireless_lan.ssid, "color": "#8b5cf6",
+                        "url": wireless_lan.get_absolute_url(), "kind": "wireless-lan",
+                    })
 
         return render(request, "netbox_topology_views/rack_elevation.html", {
             "filter_form": RackElevationFilterForm(request.GET or None),
