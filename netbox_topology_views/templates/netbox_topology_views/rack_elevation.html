@@ -148,6 +148,7 @@
   if (!root || !source) return;
   const data = JSON.parse(source.textContent);
   const isWirelessEdge = edge => edge.kind === 'wireless' || edge.kind === 'wireless-lan';
+  const isPowerEdge = edge => edge.kind === 'power';
   const rackData = JSON.parse(document.getElementById('rack-export-data').textContent);
   const columns = root.querySelector('.rack-topology-columns');
   const svg = root.querySelector('svg');
@@ -284,6 +285,7 @@
       path.setAttribute('stroke', edge.color);
       path.classList.add('rack-topology-edge');
       if (isWirelessEdge(edge)) path.classList.add('is-wireless');
+      if (isPowerEdge(edge)) path.classList.add('is-power');
       path.dataset.from = edge.from;
       path.dataset.to = edge.to;
       const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
@@ -293,7 +295,7 @@
       path.addEventListener('mouseenter', event => {
         setEdgeHighlighted(path, true);
         showTooltip(
-          `<strong>${isWirelessEdge(edge) ? 'WLAN · ' : ''}${escapeHtml(edge.label)}</strong>` +
+          `<strong>${isWirelessEdge(edge) ? 'WLAN · ' : isPowerEdge(edge) ? 'Strom · ' : ''}${escapeHtml(edge.label)}</strong>` +
           `<span>${escapeHtml(edge.from_device)} · ${escapeHtml(edge.from_port)}</span>` +
           `<span>↔ ${escapeHtml(edge.to_device)} · ${escapeHtml(edge.to_port)}</span>`,
           event.target
@@ -322,7 +324,7 @@
         const localPort = outgoing ? edge.from_port : edge.to_port;
         const remoteDevice = outgoing ? edge.to_device : edge.from_device;
         const remotePort = outgoing ? edge.to_port : edge.from_port;
-        return `<li><strong>${escapeHtml(localPort)}</strong><span>→ ${escapeHtml(remoteDevice)} · ${escapeHtml(remotePort)}</span><small>${isWirelessEdge(edge) ? 'WLAN · ' : ''}${escapeHtml(edge.label)}</small></li>`;
+        return `<li><strong>${escapeHtml(localPort)}</strong><span>→ ${escapeHtml(remoteDevice)} · ${escapeHtml(remotePort)}</span><small>${isWirelessEdge(edge) ? 'WLAN · ' : isPowerEdge(edge) ? 'Strom · ' : ''}${escapeHtml(edge.label)}</small></li>`;
       }).join('');
       showTooltip(`<strong>Verbindungen (${connections.length})</strong><ul>${rows || '<li>Keine Verbindungen</li>'}</ul>`, node);
     });
@@ -555,10 +557,12 @@
       const a = positions.get(edge.from), b = positions.get(edge.to);
       if (!a || !b) return;
       const bend = Math.max(30, Math.abs(b.x - a.x) * .35);
-      edgeContent += `<path d="M ${a.x} ${a.y} C ${a.x + bend} ${a.y}, ${b.x - bend} ${b.y}, ${b.x} ${b.y}" fill="none" stroke="${xmlEscape(edge.color)}" stroke-width="3"${isWirelessEdge(edge) ? ' stroke-dasharray="7 7"' : ''}/>`;
+      const dashPattern = isWirelessEdge(edge) ? '7 7' : isPowerEdge(edge) ? '2 4' : null;
+      const edgeLabelPrefix = isWirelessEdge(edge) ? 'WLAN · ' : isPowerEdge(edge) ? 'Strom · ' : '';
+      edgeContent += `<path d="M ${a.x} ${a.y} C ${a.x + bend} ${a.y}, ${b.x - bend} ${b.y}, ${b.x} ${b.y}" fill="none" stroke="${xmlEscape(edge.color)}" stroke-width="3"${dashPattern ? ` stroke-dasharray="${dashPattern}"` : ''}/>`;
       const sourceId = nodeCells.get(edge.from), targetId = nodeCells.get(edge.to);
       if (sourceId && targetId) {
-        drawioCells += `<mxCell id="edge-${drawioId++}" value="${xmlEscape(isWirelessEdge(edge) ? `WLAN · ${edge.label}` : edge.label)}" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeColor=${xmlEscape(edge.color)};strokeWidth=2;fontSize=9;${isWirelessEdge(edge) ? 'dashed=1;dashPattern=7 7;' : ''}" edge="1" parent="1" source="${sourceId}" target="${targetId}"><mxGeometry relative="1" as="geometry"/></mxCell>`;
+        drawioCells += `<mxCell id="edge-${drawioId++}" value="${xmlEscape(`${edgeLabelPrefix}${edge.label}`)}" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeColor=${xmlEscape(edge.color)};strokeWidth=2;fontSize=9;${dashPattern ? `dashed=1;dashPattern=${dashPattern};` : ''}" edge="1" parent="1" source="${sourceId}" target="${targetId}"><mxGeometry relative="1" as="geometry"/></mxCell>`;
       }
     });
     return {svg: svgDocument(width, height, edgeContent + content), drawio: drawioDocument(drawioCells), width, height};

@@ -6,9 +6,11 @@ class TopologyViewsConfig(PluginConfig):
     verbose_name = "Topology views"
     description = "A plugin to render topology maps"
     version = "4.5.1"
-    author = "Mattijs Vanhaverbeke & LKE"
+    author = "Mattijs Vanhaverbeke, Codex & Claude"
     author_email = "author@example.com"
     base_url = "netbox_topology_views"
+    min_version = "4.7.0"
+    max_version = "4.7.99"
     required_settings = []
     default_settings = {
         "static_image_directory": "netbox_topology_views/img",

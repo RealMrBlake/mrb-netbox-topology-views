@@ -379,6 +379,12 @@ class RackElevationFilterForm(forms.Form):
     include_empty = forms.BooleanField(
         required=False, initial=False, label=_("Include empty racks")
     )
+    show_wireless = forms.BooleanField(
+        required=False, initial=True, label=_("Show wireless links")
+    )
+    show_power = forms.BooleanField(
+        required=False, initial=True, label=_("Show power cables")
+    )
 
 
 class CoordinateGroupsForm(NetBoxModelForm):

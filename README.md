@@ -21,6 +21,7 @@ Rückseite und Verkabelung.
 - Kabeltopologie zwischen 50 und 200 Prozent zoomen und im Vollbild scrollen
 - Geräte in der Kabeltopologie mit rund 5 mm Abstand darstellen
 - P2P-WirelessLinks und Multi-Access-WLANs als violette, gestrichelte Funkstrecken darstellen
+- Funk-/WLAN-Verbindungen und Stromkabel in der Kabeltopologie der Rack-Ansicht optional ein-/ausblenden, farblich abgesetzt von Netzwerkkabeln (violett gestrichelt bzw. orange gepunktet)
 - Manuelle Positionen pro Rack-Auswahl im Browser speichern
 - Verbindungen eines Geräts beim Hover weiß hervorheben
 - Alle verbundenen Ports und Gegenstellen eines Geräts anzeigen
@@ -209,10 +210,11 @@ entsprechenden Rechte auf `netbox_topology_views.coordinate` benötigt.
 ## Kompatibilität
 
 Die Basis dieses Forks ist NetBox Topology Views `4.5.1`. Die neuen
-Rack-Funktionen wurden für den Einsatz mit NetBox `4.6.5` angepasst. Da das
-ursprüngliche Release offiziell für NetBox 4.5.x ausgewiesen ist, sollten
-Updates auf neuere NetBox-Versionen zunächst in einer Testumgebung geprüft
-werden.
+Rack-Funktionen wurden für den Einsatz mit NetBox `4.6.5` angepasst und das
+Plugin ist für NetBox `4.7.x` (`min_version`/`max_version` in
+`netbox_topology_views/__init__.py`) freigegeben. Da das ursprüngliche
+Release offiziell für NetBox 4.5.x ausgewiesen ist, sollten Updates auf
+neuere NetBox-Versionen zunächst in einer Testumgebung geprüft werden.
 
 ## Ursprung und Danksagung
 

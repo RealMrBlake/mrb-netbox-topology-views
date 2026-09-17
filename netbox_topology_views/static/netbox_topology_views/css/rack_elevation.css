@@ -110,6 +110,10 @@ html[data-netbox-color-mode="dark"] .rack-device {
   stroke-dasharray: 7 7;
   stroke-linecap: round;
 }
+.rack-topology-edge.is-power {
+  stroke-dasharray: 2 4;
+  stroke-linecap: round;
+}
 #rack-topology-card:fullscreen {
   margin: 0 !important;
   border: 0;
