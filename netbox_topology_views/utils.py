@@ -29,9 +29,8 @@ else:
 
 
 def image_static_url(path: Path) -> str:
-    return static(
-        f"/{path.relative_to(Path(settings.STATIC_ROOT))}"
-    )
+    # No leading slash: static file finders (e.g. the debug toolbar's) reject absolute paths.
+    return static(path.relative_to(Path(settings.STATIC_ROOT)).as_posix())
 
 
 def get_image_from_url(url: str) -> str:
