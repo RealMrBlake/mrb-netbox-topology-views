@@ -1,10 +1,11 @@
 {% extends 'base/layout.html' %}
+{% load i18n %}
 {% load buttons %}
 {% load render_table from django_tables2 %}
 {% load helpers %}
 {% load static %}
 
-{% block title %}Topology Views Images{% endblock %}
+{% block title %}{% trans "Topology Views Images" %}{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{% static 'netbox_topology_views/css/app.css' %}">
@@ -20,7 +21,7 @@
               {% if role.image %}
                 <img src="{{ role.image }}" />
               {% else %}
-                Image
+                {% trans "Image" %}
               {% endif %}
             </button>
             <div class="dropdown-menu mt-2" aria-labelledby="dropdownMenuButton{{ role.id }}">
@@ -36,7 +37,7 @@
       {% endfor %}
     </div>
 
-    <button class="btn btn-primary" type="submit">Save</button>
+    <button class="btn btn-primary" type="submit">{% trans "Save" %}</button>
   </form>
   {% include 'netbox_topology_views/toasts.html' %}
 {% endblock content %}
@@ -44,6 +45,7 @@
 {% block javascript %}
 <script type="text/javascript">
   const basePath = '{{ basepath }}';
+  window.topologyI18n = {savedSettings: '{{ _("Saved settings")|escapejs }}'};
 </script>
 <script src="{% static 'netbox_topology_views/js/images.js' %}" defer></script>
 {% endblock javascript %}

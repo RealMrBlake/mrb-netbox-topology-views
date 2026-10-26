@@ -1,10 +1,11 @@
+from django.utils.translation import gettext_lazy as _
 from netbox.plugins import PluginConfig
 
 
 class TopologyViewsConfig(PluginConfig):
     name = "netbox_topology_views"
-    verbose_name = "Topology views"
-    description = "A plugin to render topology maps"
+    verbose_name = _("Topology views")
+    description = _("A plugin to render topology maps")
     version = "4.5.2"
     author = "Mattijs Vanhaverbeke, Codex & Claude"
     author_email = "author@example.com"

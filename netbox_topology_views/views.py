@@ -26,6 +26,7 @@ from django.db.models import Q, QuerySet, Count
 from django.db.models.functions import Lower
 from django.http import HttpRequest, HttpResponseRedirect, QueryDict
 from django.shortcuts import render, get_object_or_404
+from django.utils.translation import gettext as _
 from django.views.generic import View
 from extras.models import Tag, SavedFilter
 from wireless.models import WirelessLAN, WirelessLink
@@ -112,20 +113,20 @@ def create_node(
 
         if device.provider is not None:
             node_content += (
-                f"<tr><th>Provider: </th><td>{device.provider.name}</td></tr>"
+                f"<tr><th>{_('Provider')}: </th><td>{device.provider.name}</td></tr>"
             )
         if device.type is not None:
-            node_content += f"<tr><th>Type: </th><td>{device.type.name}</td></tr>"
+            node_content += f"<tr><th>{_('Type')}: </th><td>{device.type.name}</td></tr>"
     elif isinstance(device, PowerPanel):
         dev_name = device.name
         node["id"] = f"p{device.pk}"
         model_name = 'PowerPanelCoordinate'
 
         if device.site is not None:
-            node_content += f"<tr><th>Site: </th><td>{device.site.name}</td></tr>"
+            node_content += f"<tr><th>{_('Site')}: </th><td>{device.site.name}</td></tr>"
         if device.location is not None:
             node_content += (
-                f"<tr><th>Location: </th><td>{device.location.name}</td></tr>"
+                f"<tr><th>{_('Location')}: </th><td>{device.location.name}</td></tr>"
             )
     elif isinstance(device, PowerFeed):
         dev_name = device.name
@@ -134,18 +135,18 @@ def create_node(
 
         if device.power_panel is not None:
             node_content += (
-                f"<tr><th>Power Panel: </th><td>{device.power_panel.name}</td></tr>"
+                f"<tr><th>{_('Power Panel')}: </th><td>{device.power_panel.name}</td></tr>"
             )
         if device.type is not None:
-            node_content += f"<tr><th>Type: </th><td>{device.type}</td></tr>"
+            node_content += f"<tr><th>{_('Type')}: </th><td>{device.type}</td></tr>"
         if device.supply is not None:
-            node_content += f"<tr><th>Supply: </th><td>{device.supply}</td></tr>"
+            node_content += f"<tr><th>{_('Supply')}: </th><td>{device.supply}</td></tr>"
         if device.phase is not None:
-            node_content += f"<tr><th>Phase: </th><td>{device.phase}</td></tr>"
+            node_content += f"<tr><th>{_('Phase')}: </th><td>{device.phase}</td></tr>"
         if device.amperage is not None:
-            node_content += f"<tr><th>Amperage: </th><td>{device.amperage}</td></tr>"
+            node_content += f"<tr><th>{_('Amperage')}: </th><td>{device.amperage}</td></tr>"
         if device.voltage is not None:
-            node_content += f"<tr><th>Voltage: </th><td>{device.voltage}</td></tr>"
+            node_content += f"<tr><th>{_('Voltage')}: </th><td>{device.voltage}</td></tr>"
     else:
         model_name = 'Coordinate'
         dev_name = device.name
@@ -154,32 +155,32 @@ def create_node(
 
         if device.device_type is not None:
             node_content += (
-                f"<tr><th>Type: </th><td>{device.device_type.model}</td></tr>"
+                f"<tr><th>{_('Type')}: </th><td>{device.device_type.model}</td></tr>"
             )
         if device.role.name is not None:
             node_content += (
-                f"<tr><th>Role: </th><td>{device.role.name}</td></tr>"
+                f"<tr><th>{_('Role')}: </th><td>{device.role.name}</td></tr>"
             )
         if device.serial != "":
-            node_content += f"<tr><th>Serial: </th><td>{device.serial}</td></tr>"
+            node_content += f"<tr><th>{_('Serial')}: </th><td>{device.serial}</td></tr>"
         if device.primary_ip is not None:
             node_content += (
-                f"<tr><th>IP Address: </th><td>{device.primary_ip.address}</td></tr>"
+                f"<tr><th>{_('IP Address')}: </th><td>{device.primary_ip.address}</td></tr>"
             )
         if device.site is not None:
-            node_content += f"<tr><th>Site: </th><td>{device.site.name}</td></tr>"
+            node_content += f"<tr><th>{_('Site')}: </th><td>{device.site.name}</td></tr>"
         if device.location is not None:
             node_content += (
-                f"<tr><th>Location: </th><td>{device.location.name}</td></tr>"
+                f"<tr><th>{_('Location')}: </th><td>{device.location.name}</td></tr>"
             )
         if device.rack is not None:
-            node_content += f"<tr><th>Rack: </th><td>{device.rack.name}</td></tr>"
+            node_content += f"<tr><th>{_('Rack')}: </th><td>{device.rack.name}</td></tr>"
         if device.position is not None:
             if device.face is not None:
-                node_content += f"<tr><th>Position: </th><td>{device.position} ({device.face})</td></tr>"
+                node_content += f"<tr><th>{_('Position')}: </th><td>{device.position} ({device.face})</td></tr>"
             else:
                 node_content += (
-                    f"<tr><th>Position: </th><td>{device.position}</td></tr>"
+                    f"<tr><th>{_('Position')}: </th><td>{device.position}</td></tr>"
                 )
 
         node["id"] = device.pk
@@ -282,22 +283,22 @@ def create_edge(
     interface: Optional[Interface] = None,
 ):
     cable_a_name = (
-        "device A name unknown"
+        _("termination A name unknown")
         if termination_a["termination_name"] is None
         else termination_a["termination_name"]
     )
     cable_a_dev_name = (
-        "device A name unknown"
+        _("device A name unknown")
         if termination_a["termination_device_name"] is None
         else termination_a["termination_device_name"]
     )
     cable_b_name = (
-        "device A name unknown"
+        _("termination B name unknown")
         if termination_b["termination_name"] is None
         else termination_b["termination_name"]
     )
     cable_b_dev_name = (
-        "cable B name unknown"
+        _("device B name unknown")
         if termination_b["termination_device_name"] is None
         else termination_b["termination_device_name"]
     )
@@ -307,29 +308,29 @@ def create_edge(
     edge["from"] = termination_a["device_id"]
     edge["to"] = termination_b["device_id"]
     edge["color"] = '#2b7ce9'
-    title = "Cable"
+    title = _("Cable")
 
     if circuit is not None:
         edge["dashes"] = True
-        title = f"Circuit provider: {circuit['provider_name']}<br>Termination"
+        title = _("Circuit provider: %(provider)s<br>Termination") % {"provider": circuit['provider_name']}
 
     elif wireless is not None:
         edge["dashes"] = LinePattern().wireless
-        title = "Wireless Connection"
+        title = _("Wireless Connection")
 
     elif power is not None:
         edge["dashes"] = LinePattern().power
-        title = "Power Connection"
+        title = _("Power Connection")
 
     elif interface is not None:
-        title = "Interface Connection"
+        title = _("Interface Connection")
         edge["width"] = 3
         edge["dashes"] = LinePattern().logical
         edge["color"] = '#f1c232'
         edge["href"] = interface.get_absolute_url() + "trace"
     
     if cable is not None and hasattr(cable, "label") and cable.label:
-        cable_label = "<br>Label: " + cable.label
+        cable_label = "<br>" + _("Label: %(label)s") % {"label": cable.label}
         if draw_cable_labels is True:
             edge["label"] = cable.label
     else:
@@ -337,7 +338,13 @@ def create_edge(
 
     edge[
         "title"
-    ] = f"{title} between<br>{cable_a_dev_name} [{cable_a_name}]<br>{cable_b_dev_name} [{cable_b_name}] {cable_label}"
+    ] = _("%(title)s between<br>%(device_a)s [%(termination_a)s]<br>%(device_b)s [%(termination_b)s]") % {
+        "title": title,
+        "device_a": cable_a_dev_name,
+        "termination_a": cable_a_name,
+        "device_b": cable_b_dev_name,
+        "termination_b": cable_b_name,
+    } + f" {cable_label}"
 
     if cable is not None:
         edge["href"] = cable.get_absolute_url()
@@ -922,10 +929,10 @@ def _rack_endpoint(termination):
     return {
         "node_id": f"device-{device.pk}" if device else f"external-{termination._meta.model_name}-{termination.pk}",
         "device_id": getattr(device, "pk", None),
-        "device_name": getattr(device, "name", None) or "External",
+        "device_name": getattr(device, "name", None) or _("External"),
         "name": getattr(termination, "name", str(termination)),
         "rack_id": getattr(device, "rack_id", None),
-        "rack_name": getattr(getattr(device, "rack", None), "name", None) or "Extern",
+        "rack_name": getattr(getattr(device, "rack", None), "name", None) or _("External"),
         "url": device.get_absolute_url() if device else None,
         "color": getattr(getattr(device, "role", None), "color", None) or "1685fc",
         "position": float(device.position or 1) if device else None,
@@ -1076,8 +1083,8 @@ class RackElevationView(PermissionRequiredMixin, View):
                 topology_nodes[wlan_node_id] = {
                     "node_id": wlan_node_id, "device_id": None,
                     "device_name": f"WLAN · {wireless_lan.ssid}",
-                    "name": wireless_lan.ssid, "subtitle": "Multi-Access WLAN",
-                    "rack_id": None, "rack_name": "Funknetze",
+                    "name": wireless_lan.ssid, "subtitle": _("Multi-Access WLAN"),
+                    "rack_id": None, "rack_name": _("Wireless networks"),
                     "url": wireless_lan.get_absolute_url(), "color": "8b5cf6",
                     "position": None, "height": 1, "face": "front", "rack_u_height": None,
                     "kind": "wireless-lan",
@@ -1102,8 +1109,20 @@ class RackElevationView(PermissionRequiredMixin, View):
             "racks": rack_list, "cables": cable_rows,
             "rack_topology": {"nodes": list(topology_nodes.values()), "edges": topology_edges},
             "rack_export": rack_export,
-            "faces": (("front", "Vorderseite"), ("rear", "Rückseite")),
+            "faces": (("front", _("Front")), ("rear", _("Rear"))),
             "has_selection": bool(request.GET),
+            # Labels for the inline script, which cannot use template tags
+            "i18n": {
+                "external": _("External"),
+                "power": _("Power"),
+                "connections": _("Connections"),
+                "noConnections": _("No connections"),
+                "fullScreen": _("Full screen"),
+                "exitFullScreen": _("Exit full screen"),
+                "device": _("Device"),
+                "front": _("Front"),
+                "rear": _("Rear"),
+            },
         })
 
 
@@ -1400,7 +1419,7 @@ class TopologyIndividualOptionsView(PermissionRequiredMixin, View):
         form = IndividualOptionsForm(request.POST, instance=instance)
         if form.is_valid():
             form.save()
-            messages.success(request, "Options have been sucessfully saved")
+            messages.success(request, _("Options have been successfully saved"))
         else:
             messages.error(request, form.errors)
             

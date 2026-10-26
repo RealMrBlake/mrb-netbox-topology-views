@@ -1,25 +1,26 @@
 {% extends 'generic/object.html' %}
+{% load i18n %}
 {% load helpers %}
 {% load plugins %}
 {% load render_table from django_tables2 %}
 
-{% block title %}Topology Views Coordinate Group{% endblock title %}
+{% block title %}{% trans "Topology Views Coordinate Group" %}{% endblock title %}
 
 {% block content %}
 <div class="row mb-3">
 	<div class="col col-md-6">
     <div class="card">
       <h5 class="card-header">
-        Coordinate Group
+        {% trans "Coordinate Group" %}
       </h5>
       <div class="card-body">
         <table class="table table-hover attr-table">
           <tr>
-            <th scope="row">Name</th>
+            <th scope="row">{% trans "Name" %}</th>
             <td>{{ object.name }}</td>
           </tr>
           <tr>
-            <th scope="row">Description</th>
+            <th scope="row">{% trans "Description" %}</th>
             <td>{{ object.description|placeholder }}</td>
           </tr>
         </table>
@@ -35,7 +36,7 @@
 <div class="row mb-3">
   <div class="col col-md-12">
     <div class="card">
-      <h5 class="card-header">Circuit Coordinates</h5>
+      <h5 class="card-header">{% trans "Circuit Coordinates" %}</h5>
       <div class="card-body table-responsive">
         {% render_table circuitcoordinates_table %}
       </div>
@@ -43,7 +44,7 @@
   </div>
   <div class="col col-md-12">
     <div class="card">
-      <h5 class="card-header">Power Panel Coordinates</h5>
+      <h5 class="card-header">{% trans "Power Panel Coordinates" %}</h5>
       <div class="card-body table-responsive">
         {% render_table powerpanelcoordinates_table %}
       </div>
@@ -51,7 +52,7 @@
   </div>
   <div class="col col-md-12">
     <div class="card">
-      <h5 class="card-header">Power Feed Coordinates</h5>
+      <h5 class="card-header">{% trans "Power Feed Coordinates" %}</h5>
       <div class="card-body table-responsive">
         {% render_table powerfeedcoordinates_table %}
       </div>
@@ -59,7 +60,7 @@
   </div>
   <div class="col col-md-12">
     <div class="card">
-      <h5 class="card-header">Device Coordinates</h5>
+      <h5 class="card-header">{% trans "Device Coordinates" %}</h5>
       <div class="card-body table-responsive">
         {% render_table coordinates_table %}
       </div>

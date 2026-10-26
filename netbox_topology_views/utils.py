@@ -12,6 +12,7 @@ from django.db.models import Model
 from django.templatetags.static import static
 from django.utils.text import camel_case_to_spaces, re_camel_case
 from django.contrib import messages
+from django.utils.translation import gettext as _
 
 IMAGE_DIR = Path(settings.STATIC_ROOT) / "netbox_topology_views/img"
 if sys.version_info >= (3,9,0):
@@ -117,7 +118,7 @@ def get_query_settings(request):
     # General options overrides
     if save_coords == True and settings.PLUGINS_CONFIG["netbox_topology_views"]["allow_coordinates_saving"] == False:
         save_coords = False
-        messages.warning(request, "Coordinate saving not allowed. Setting has been overridden")
+        messages.warning(request, _("Coordinate saving not allowed. Setting has been overridden"))
     elif settings.PLUGINS_CONFIG["netbox_topology_views"]["always_save_coordinates"] == True:
         save_coords = True
 
@@ -343,7 +344,7 @@ def export_data_to_xml(data: dict):
     if noPositionX > 0:
         mxcell = doc.createElement('mxCell')
         mxcell.setAttribute('id', 'noPositionWarning')
-        mxcell.setAttribute('value', 'One or more icons are misplaced. This happens if no coordinates are stored for a device. Turn on coordinates saving and make sure to drag all icons in the topology to a specific position before exporting to XML.')
+        mxcell.setAttribute('value', _('One or more icons are misplaced. This happens if no coordinates are stored for a device. Turn on coordinates saving and make sure to drag all icons in the topology to a specific position before exporting to XML.'))
         mxcell.setAttribute('style', 'text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#FF0000;fontStyle=0;fontSize=35;labelBackgroundColor=#FFFF99;labelBorderColor=none;strokeWidth=20;')
         mxcell.setAttribute('vertex', '1')
         mxcell.setAttribute('parent', '1')

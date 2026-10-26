@@ -3,6 +3,7 @@ from circuits.models import Circuit
 from dcim.choices import DeviceStatusChoices
 from dcim.models import Device, DeviceRole, Location, Rack, Region, Site, SiteGroup, Manufacturer, DeviceType, Platform, PowerPanel, PowerFeed
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 from extras.filtersets import LocalConfigContextFilterSet
 from extras.models import ConfigTemplate
 from netbox.filtersets import NetBoxModelFilterSet
@@ -13,58 +14,58 @@ from netbox_topology_views.models import CoordinateGroup, Coordinate, CircuitCoo
 class DeviceFilterSet(NetBoxModelFilterSet, TenancyFilterSet, ContactModelFilterSet, LocalConfigContextFilterSet):
     q = django_filters.CharFilter(
         method="search",
-        label="Search",
+        label=_("Search"),
     )
     manufacturer_id = django_filters.ModelMultipleChoiceFilter(
         field_name='device_type__manufacturer',
         queryset=Manufacturer.objects.all(),
-        label="Manufacturer (ID)",
+        label=_("Manufacturer (ID)"),
     )
     manufacturer = django_filters.ModelMultipleChoiceFilter(
         field_name='device_type__manufacturer__slug',
         queryset=Manufacturer.objects.all(),
         to_field_name='slug',
-        label="Manufacturer (slug)",
+        label=_("Manufacturer (slug)"),
     )
     device_type_id = django_filters.ModelMultipleChoiceFilter(
         queryset=DeviceType.objects.all(),
-        label="Device type (ID)",
+        label=_("Device type (ID)"),
     )
     role_id = django_filters.ModelMultipleChoiceFilter(
         field_name="role_id",
         queryset=DeviceRole.objects.all(),
-        label="Role (ID)",
+        label=_("Role (ID)"),
     )
     platform_id = django_filters.ModelMultipleChoiceFilter(
         queryset=Platform.objects.all(),
-        label="Platform (ID)",
+        label=_("Platform (ID)"),
     )
     region_id = TreeNodeMultipleChoiceFilter(
         queryset=Region.objects.all(),
         field_name="site__region",
         lookup_expr="in",
-        label="Region (ID)",
+        label=_("Region (ID)"),
     )
     site_group_id = TreeNodeMultipleChoiceFilter(
         queryset=SiteGroup.objects.all(),
         field_name="site__group",
         lookup_expr="in",
-        label="Site Group (ID)",
+        label=_("Site Group (ID)"),
     )
     site_id = django_filters.ModelMultipleChoiceFilter(
         queryset=Site.objects.all(),
-        label="Site (ID)",
+        label=_("Site (ID)"),
     )
     location_id = TreeNodeMultipleChoiceFilter(
         queryset=Location.objects.all(),
         field_name="location",
         lookup_expr="in",
-        label="Location (ID)",
+        label=_("Location (ID)"),
     )
     rack_id = django_filters.ModelMultipleChoiceFilter(
         queryset=Rack.objects.all(),
         field_name="rack_id",
-        label="Rack (ID)",
+        label=_("Rack (ID)"),
     )
     status = django_filters.MultipleChoiceFilter(
         choices=DeviceStatusChoices,
@@ -72,50 +73,50 @@ class DeviceFilterSet(NetBoxModelFilterSet, TenancyFilterSet, ContactModelFilter
     )
     mac_address = MultiValueMACAddressFilter(
         field_name='interfaces__mac_addresses__mac_address',
-        label="MAC address",
+        label=_("MAC address"),
     )
     serial = MultiValueCharFilter(
         lookup_expr='iexact'
     )
     console_ports = django_filters.BooleanFilter(
         method='_console_ports',
-        label="Has console ports",
+        label=_("Has console ports"),
     )
     console_server_ports = django_filters.BooleanFilter(
         method='_console_server_ports',
-        label="Has console server ports",
+        label=_("Has console server ports"),
     )
     power_ports = django_filters.BooleanFilter(
         method='_power_ports',
-        label="Has power ports",
+        label=_("Has power ports"),
     )
     power_outlets = django_filters.BooleanFilter(
         method='_power_outlets',
-        label="Has power outlets",
+        label=_("Has power outlets"),
     )
     interfaces = django_filters.BooleanFilter(
         method='_interfaces',
-        label="Has interfaces",
+        label=_("Has interfaces"),
     )
     pass_through_ports = django_filters.BooleanFilter(
         method='_pass_through_ports',
-        label="Has pass-through ports",
+        label=_("Has pass-through ports"),
     )
     config_template_id = django_filters.ModelMultipleChoiceFilter(
         queryset=ConfigTemplate.objects.all(),
-        label="Config template (ID)",
+        label=_("Config template (ID)"),
     )
     has_primary_ip = django_filters.BooleanFilter(
         method='_has_primary_ip',
-        label="Has a primary IP",
+        label=_("Has a primary IP"),
     )
     has_oob_ip = django_filters.BooleanFilter(
         method='_has_oob_ip',
-        label="Has an out-of-band IP",
+        label=_("Has an out-of-band IP"),
     )
     virtual_chassis_member = django_filters.BooleanFilter(
         method='_virtual_chassis_member',
-        label="Is a virtual chassis member",
+        label=_("Is a virtual chassis member"),
     )
 
     class Meta:

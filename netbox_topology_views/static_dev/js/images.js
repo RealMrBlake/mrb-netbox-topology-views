@@ -15,7 +15,7 @@ document.querySelector('form#images').addEventListener('submit', async (e) => {
         })
 
         if (!res.ok) throw new Error(await res.text())
-        toast.success('Saved settings')
+        toast.success(window.topologyI18n?.savedSettings ?? 'Saved settings')
     } catch (err) {
         console.dir(err)
         toast.error(err.message)

@@ -1,8 +1,9 @@
 {% extends 'generic/_base.html' %}
 {% load helpers %}
+{% load i18n %}
 {% load static %}
 
-{% block title %}Rack-Ansicht{% endblock %}
+{% block title %}{% trans "Rack view" %}{% endblock %}
 
 {% block head %}
   <link rel="stylesheet" href="{% static 'netbox_topology_views/css/app.css' %}">
@@ -11,7 +12,7 @@
 
 {% block content %}
 <div class="card mb-3">
-  <div class="card-header"><strong>Racks auswählen</strong></div>
+  <div class="card-header"><strong>{% trans "Select racks" %}</strong></div>
   <div class="card-body">
     <form method="get">
       <div class="row g-3">
@@ -25,8 +26,8 @@
         {% endfor %}
       </div>
       <div class="mt-3">
-        <button class="btn btn-primary" type="submit"><i class="mdi mdi-magnify"></i> Anzeigen</button>
-        <a class="btn btn-outline-secondary" href="{% url 'plugins:netbox_topology_views:rack_elevation' %}">Zurücksetzen</a>
+        <button class="btn btn-primary" type="submit"><i class="mdi mdi-magnify"></i> {% trans "Show" %}</button>
+        <a class="btn btn-outline-secondary" href="{% url 'plugins:netbox_topology_views:rack_elevation' %}">{% trans "Reset" %}</a>
       </div>
     </form>
   </div>
@@ -34,7 +35,7 @@
 
 {% if racks %}
 <div class="d-flex justify-content-end align-items-center gap-2 mb-3 flex-wrap">
-  <strong class="me-2">Alle Racks exportieren:</strong>
+  <strong class="me-2">{% trans "Export all racks:" %}</strong>
   <button class="btn btn-sm btn-outline-primary rack-export" data-format="svg" data-scope="all">SVG</button>
   <button class="btn btn-sm btn-outline-primary rack-export" data-format="png" data-scope="all">PNG</button>
   <button class="btn btn-sm btn-outline-primary rack-export" data-format="drawio" data-scope="all">draw.io</button>
@@ -45,7 +46,7 @@
     <header>
       <div><a href="{{ rack.get_absolute_url }}"><strong>{{ rack.name }}</strong></a><br>
       <small>{{ rack.site }}{% if rack.location %} · {{ rack.location }}{% endif %} · {{ rack.u_height }}U</small></div>
-      <div class="btn-group" aria-label="{{ rack.name }} exportieren">
+      <div class="btn-group" aria-label="{% blocktrans with name=rack.name %}Export {{ name }}{% endblocktrans %}">
         <button class="btn btn-sm btn-outline-secondary rack-export" data-format="svg" data-scope="{{ rack.pk }}">SVG</button>
         <button class="btn btn-sm btn-outline-secondary rack-export" data-format="png" data-scope="{{ rack.pk }}">PNG</button>
         <button class="btn btn-sm btn-outline-secondary rack-export" data-format="drawio" data-scope="{{ rack.pk }}">draw.io</button>
@@ -84,16 +85,16 @@
 
 <div id="rack-topology-card" class="card mt-4">
   <div class="card-header d-flex justify-content-between align-items-center">
-    <strong>Kabeltopologie</strong>
+    <strong>{% trans "Cable topology" %}</strong>
     <div class="d-flex gap-2 align-items-center">
       <div class="d-flex gap-3 align-items-center rack-topology-kind-toggles">
         <div class="form-check form-check-inline mb-0">
           <input class="form-check-input" type="checkbox" id="rack-topology-show-wireless" checked>
-          <label class="form-check-label" for="rack-topology-show-wireless">Funk/WLAN</label>
+          <label class="form-check-label" for="rack-topology-show-wireless">{% trans "Wireless/WLAN" %}</label>
         </div>
         <div class="form-check form-check-inline mb-0">
           <input class="form-check-input" type="checkbox" id="rack-topology-show-power" checked>
-          <label class="form-check-label" for="rack-topology-show-power">Strom</label>
+          <label class="form-check-label" for="rack-topology-show-power">{% trans "Power" %}</label>
         </div>
       </div>
       <div class="btn-group">
@@ -101,21 +102,21 @@
         <button class="btn btn-sm btn-outline-primary topology-export" data-format="png">PNG</button>
         <button class="btn btn-sm btn-outline-primary topology-export" data-format="drawio">draw.io</button>
       </div>
-      <div class="btn-group" aria-label="Topologie zoomen">
-        <button id="rack-topology-zoom-out" class="btn btn-sm btn-outline-secondary" type="button" title="Verkleinern"><i class="mdi mdi-minus"></i></button>
-        <button id="rack-topology-zoom-reset" class="btn btn-sm btn-outline-secondary" type="button" title="Zoom zurücksetzen"><span id="rack-topology-zoom-label">100%</span></button>
-        <button id="rack-topology-zoom-in" class="btn btn-sm btn-outline-secondary" type="button" title="Vergrößern"><i class="mdi mdi-plus"></i></button>
+      <div class="btn-group" aria-label="{% trans "Zoom topology" %}">
+        <button id="rack-topology-zoom-out" class="btn btn-sm btn-outline-secondary" type="button" title="{% trans "Zoom out" %}"><i class="mdi mdi-minus"></i></button>
+        <button id="rack-topology-zoom-reset" class="btn btn-sm btn-outline-secondary" type="button" title="{% trans "Reset zoom" %}"><span id="rack-topology-zoom-label">100%</span></button>
+        <button id="rack-topology-zoom-in" class="btn btn-sm btn-outline-secondary" type="button" title="{% trans "Zoom in" %}"><i class="mdi mdi-plus"></i></button>
       </div>
       <button id="rack-topology-reset" class="btn btn-sm btn-outline-secondary" type="button">
-        <i class="mdi mdi-restore"></i> Positionen zurücksetzen
+        <i class="mdi mdi-restore"></i> {% trans "Reset positions" %}
       </button>
       <button id="rack-topology-fullscreen" class="btn btn-sm btn-outline-secondary" type="button">
-        <i class="mdi mdi-fullscreen"></i> Vollbild
+        <i class="mdi mdi-fullscreen"></i> {% trans "Full screen" %}
       </button>
     </div>
   </div>
   <div class="card-body">
-    <div id="rack-topology" class="rack-topology" aria-label="Topologie der ausgewählten Racks">
+    <div id="rack-topology" class="rack-topology" aria-label="{% trans "Topology of the selected racks" %}">
       <svg class="rack-topology-lines" aria-hidden="true"></svg>
       <div class="rack-topology-columns"></div>
       <div class="rack-topology-tooltip" role="tooltip"></div>
@@ -124,12 +125,13 @@
 </div>
 {{ rack_topology|json_script:"rack-topology-data" }}
 {{ rack_export|json_script:"rack-export-data" }}
+{{ i18n|json_script:"rack-i18n-data" }}
 
 <div class="card mt-4">
-  <div class="card-header"><strong>Verkabelung der angezeigten Racks</strong> <span class="badge rack-cable-count">{{ cables|length }}</span></div>
+  <div class="card-header"><strong>{% trans "Cabling of the displayed racks" %}</strong> <span class="badge rack-cable-count">{{ cables|length }}</span></div>
   <div class="table-responsive">
     <table class="table table-hover mb-0">
-      <thead><tr><th>Kabel</th><th>A-Seite</th><th>B-Seite</th><th>Typ</th><th>Status</th></tr></thead>
+      <thead><tr><th>{% trans "Cable" %}</th><th>{% trans "A side" %}</th><th>{% trans "B side" %}</th><th>{% trans "Type" %}</th><th>{% trans "Status" %}</th></tr></thead>
       <tbody>
       {% for row in cables %}
         <tr>
@@ -138,15 +140,15 @@
           <td>{% if row.b %}<strong>{{ row.b.device_name }}</strong><br><small>{{ row.b.name }}</small>{% else %}—{% endif %}</td>
           <td>{{ row.cable.type|default:'—' }}</td><td>{{ row.cable.get_status_display }}</td>
         </tr>
-      {% empty %}<tr><td colspan="5" class="text-muted text-center py-4">Keine Verkabelung gefunden.</td></tr>{% endfor %}
+      {% empty %}<tr><td colspan="5" class="text-muted text-center py-4">{% trans "No cabling found." %}</td></tr>{% endfor %}
       </tbody>
     </table>
   </div>
 </div>
 {% elif has_selection %}
-<div class="alert alert-warning">Für diese Auswahl wurden keine belegten Racks gefunden. Aktiviere „Leere Racks einschließen“, um auch leere Racks zu sehen.</div>
+<div class="alert alert-warning">{% trans "No occupied racks were found for this selection. Enable “Include empty racks” to show empty racks as well." %}</div>
 {% else %}
-<div class="alert alert-info">Wähle ein oder mehrere Racks oder grenze die Ansicht über Standort und Location ein.</div>
+<div class="alert alert-info">{% trans "Select one or more racks, or narrow the view by site and location." %}</div>
 {% endif %}
 {% endblock %}
 
@@ -157,6 +159,7 @@
   const source = document.getElementById('rack-topology-data');
   if (!root || !source) return;
   const data = JSON.parse(source.textContent);
+  const t = JSON.parse(document.getElementById('rack-i18n-data').textContent);
   const isWirelessEdge = edge => edge.kind === 'wireless' || edge.kind === 'wireless-lan';
   const isPowerEdge = edge => edge.kind === 'power';
   const showWirelessCheckbox = document.getElementById('rack-topology-show-wireless');
@@ -218,9 +221,9 @@
   const groups = new Map();
 
   data.nodes.forEach(node => {
-    const groupKey = node.rack_id ? `rack-${node.rack_id}` : `external-${node.rack_name || 'Extern'}`;
+    const groupKey = node.rack_id ? `rack-${node.rack_id}` : `external-${node.rack_name || t.external}`;
     if (!groups.has(groupKey)) groups.set(groupKey, {
-      name: node.rack_name || 'Extern',
+      name: node.rack_name || t.external,
       rackUnits: node.rack_u_height || null,
       descUnits: Boolean(node.rack_desc_units),
       nodes: [],
@@ -323,7 +326,7 @@
       path.addEventListener('mouseenter', event => {
         setEdgeHighlighted(path, true);
         showTooltip(
-          `<strong>${isWirelessEdge(edge) ? 'WLAN · ' : isPowerEdge(edge) ? 'Strom · ' : ''}${escapeHtml(edge.label)}</strong>` +
+          `<strong>${isWirelessEdge(edge) ? 'WLAN · ' : isPowerEdge(edge) ? `${t.power} · ` : ''}${escapeHtml(edge.label)}</strong>` +
           `<span>${escapeHtml(edge.from_device)} · ${escapeHtml(edge.from_port)}</span>` +
           `<span>↔ ${escapeHtml(edge.to_device)} · ${escapeHtml(edge.to_port)}</span>`,
           event.target
@@ -352,9 +355,9 @@
         const localPort = outgoing ? edge.from_port : edge.to_port;
         const remoteDevice = outgoing ? edge.to_device : edge.from_device;
         const remotePort = outgoing ? edge.to_port : edge.from_port;
-        return `<li><strong>${escapeHtml(localPort)}</strong><span>→ ${escapeHtml(remoteDevice)} · ${escapeHtml(remotePort)}</span><small>${isWirelessEdge(edge) ? 'WLAN · ' : isPowerEdge(edge) ? 'Strom · ' : ''}${escapeHtml(edge.label)}</small></li>`;
+        return `<li><strong>${escapeHtml(localPort)}</strong><span>→ ${escapeHtml(remoteDevice)} · ${escapeHtml(remotePort)}</span><small>${isWirelessEdge(edge) ? 'WLAN · ' : isPowerEdge(edge) ? `${t.power} · ` : ''}${escapeHtml(edge.label)}</small></li>`;
       }).join('');
-      showTooltip(`<strong>Verbindungen (${connections.length})</strong><ul>${rows || '<li>Keine Verbindungen</li>'}</ul>`, node);
+      showTooltip(`<strong>${escapeHtml(t.connections)} (${connections.length})</strong><ul>${rows || `<li>${escapeHtml(t.noConnections)}</li>`}</ul>`, node);
     });
     node.addEventListener('mouseleave', () => {
       svg.querySelectorAll('.rack-topology-edge').forEach(path => {
@@ -412,8 +415,8 @@
   document.addEventListener('fullscreenchange', () => {
     const active = document.fullscreenElement === topologyCard;
     fullscreenButton.innerHTML = active
-      ? '<i class="mdi mdi-fullscreen-exit"></i> Vollbild verlassen'
-      : '<i class="mdi mdi-fullscreen"></i> Vollbild';
+      ? `<i class="mdi mdi-fullscreen-exit"></i> ${escapeHtml(t.exitFullScreen)}`
+      : `<i class="mdi mdi-fullscreen"></i> ${escapeHtml(t.fullScreen)}`;
     requestAnimationFrame(drawEdges);
   });
   const setTopologyZoom = value => {
@@ -457,7 +460,7 @@
       const bottomUnits = bottom / 100 * rackUnits;
       const startingUnit = Number(rack.starting_unit) || 1;
       return {
-        name: device.dataset.deviceName || device.querySelector('span')?.textContent || 'Gerät',
+        name: device.dataset.deviceName || device.querySelector('span')?.textContent || t.device,
         type: device.dataset.deviceType || '',
         position: rack.desc_units
           ? startingUnit + rackUnits - deviceHeight - bottomUnits
@@ -488,7 +491,7 @@
       vertex(`${rack.site}${rack.location ? ` · ${rack.location}` : ''} · ${rack.u_height}U`, `text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontColor=${palette.muted};`, baseX, 24, rackWidth, 20);
       ['front', 'rear'].forEach((face, faceIndex) => {
         const x = baseX + labelWidth + faceIndex * (faceWidth + faceGap);
-        vertex(face === 'front' ? 'VORDERSEITE' : 'RÜCKSEITE', `text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=${palette.muted};`, x, 38, faceWidth, 17);
+        vertex(face === 'front' ? t.front.toUpperCase() : t.rear.toUpperCase(), `text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=${palette.muted};`, x, 38, faceWidth, 17);
         vertex('', `rounded=0;html=1;fillColor=none;strokeColor=${palette.frame};strokeWidth=4;`, x, header, faceWidth, rackHeight);
         for (let row = 0; row < rack.u_height; row++) {
           const y = header + row * unit;
@@ -525,7 +528,7 @@
       content += `<text x="${baseX}" y="39" fill="${palette.muted}" font-family="sans-serif" font-size="11">${xmlEscape(rack.site)}${rack.location ? ` · ${xmlEscape(rack.location)}` : ''} · ${rack.u_height}U</text>`;
       ['front', 'rear'].forEach((face, faceIndex) => {
         const x = baseX + labelWidth + faceIndex * (faceWidth + faceGap);
-        content += `<text x="${x + faceWidth / 2}" y="51" text-anchor="middle" fill="${palette.muted}" font-family="sans-serif" font-size="10">${face === 'front' ? 'VORDERSEITE' : 'RÜCKSEITE'}</text>`;
+        content += `<text x="${x + faceWidth / 2}" y="51" text-anchor="middle" fill="${palette.muted}" font-family="sans-serif" font-size="10">${face === 'front' ? t.front.toUpperCase() : t.rear.toUpperCase()}</text>`;
         content += `<rect x="${x}" y="${header}" width="${faceWidth}" height="${rackHeight}" fill="none" stroke="${palette.frame}" stroke-width="4"/>`;
         for (let row = 0; row < rack.u_height; row++) {
           const y = header + row * unit;
@@ -588,7 +591,7 @@
       if (!a || !b) return;
       const bend = Math.max(30, Math.abs(b.x - a.x) * .35);
       const dashPattern = isWirelessEdge(edge) ? '7 7' : isPowerEdge(edge) ? '2 4' : null;
-      const edgeLabelPrefix = isWirelessEdge(edge) ? 'WLAN · ' : isPowerEdge(edge) ? 'Strom · ' : '';
+      const edgeLabelPrefix = isWirelessEdge(edge) ? 'WLAN · ' : isPowerEdge(edge) ? `${t.power} · ` : '';
       edgeContent += `<path d="M ${a.x} ${a.y} C ${a.x + bend} ${a.y}, ${b.x - bend} ${b.y}, ${b.x} ${b.y}" fill="none" stroke="${xmlEscape(edge.color)}" stroke-width="3"${dashPattern ? ` stroke-dasharray="${dashPattern}"` : ''}/>`;
       const sourceId = nodeCells.get(edge.from), targetId = nodeCells.get(edge.to);
       if (sourceId && targetId) {
@@ -637,11 +640,11 @@
   document.querySelectorAll('.rack-export').forEach(button => button.addEventListener('click', () => {
     const selectedRacks = button.dataset.scope === 'all' ? rackData : rackData.filter(rack => String(rack.id) === button.dataset.scope);
     const racks = renderedRackData(selectedRacks);
-    const name = button.dataset.scope === 'all' ? 'racks-gesamt' : `rack-${safeName(racks[0]?.name)}`;
+    const name = button.dataset.scope === 'all' ? 'racks-all' : `rack-${safeName(racks[0]?.name)}`;
     exportGraphic(buildRackSvg(racks), button.dataset.format, name);
   }));
   document.querySelectorAll('.topology-export').forEach(button => button.addEventListener('click', () => {
-    exportGraphic(buildTopologySvg(), button.dataset.format, 'rack-topologie');
+    exportGraphic(buildTopologySvg(), button.dataset.format, 'rack-topology');
   }));
   showWirelessCheckbox?.addEventListener('change', applyKindVisibility);
   showPowerCheckbox?.addEventListener('change', applyKindVisibility);

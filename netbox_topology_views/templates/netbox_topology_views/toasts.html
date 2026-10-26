@@ -1,3 +1,4 @@
+{% load i18n %}
 <div id="django-messages" class="toast-container">
     <div
         id="topology-plugin-error-toast"
@@ -10,13 +11,13 @@
         <div class="d-flex">
             <div class="toast-body">
                 😢
-                <span>Error</span>
+                <span>{% trans "Error" %}</span>
             </div>
             <button
                 type="button"
                 class="btn-close me-2 m-auto"
                 data-bs-dismiss="toast"
-                aria-label="Close"
+                aria-label="{% trans "Close" %}"
             ></button>
         </div>
     </div>
@@ -31,13 +32,13 @@
         <div class="d-flex">
             <div class="toast-body">
                 👍
-                <span>Success</span>
+                <span>{% trans "Success" %}</span>
             </div>
             <button
                 type="button"
                 class="btn-close me-2 m-auto"
                 data-bs-dismiss="toast"
-                aria-label="Close"
+                aria-label="{% trans "Close" %}"
             ></button>
         </div>
     </div>

@@ -1,4 +1,3 @@
-from cProfile import label
 from django import forms
 from django.conf import settings
 
@@ -159,7 +158,7 @@ class DeviceFilterForm(
     platform_id = DynamicModelMultipleChoiceField(
         queryset=Platform.objects.all(),
         required=False,
-        null_option='None',
+        null_option=_('None'),
         label=_('Platform')
     )
     console_ports = forms.NullBooleanField(
@@ -649,7 +648,7 @@ class IndividualOptionsForm(NetBoxModelForm):
             'are displayed as yellow dotted lines.')
     )
     show_single_cable_logical_conns = forms.BooleanField(
-        label = ('Show redundant Cable and Logical Connection'),
+        label = _('Show redundant Cable and Logical Connection'),
         required = False,
         initial=False,
         help_text=_('Shows a logical connection (in addition to a cable), '
@@ -694,28 +693,28 @@ class IndividualOptionsForm(NetBoxModelForm):
             'same virtual chassis.')
     )
     draw_default_layout = forms.BooleanField(
-        label = ('Draw Default Layout'),
+        label = _('Draw Default Layout'),
         required=False,
         initial=False,
         help_text=_('Enable this option if you want to draw the topology on '
             'the initial load (when you go to the topology plugin page).')
     )
     straight_cables = forms.BooleanField(
-        label=('Use Straight Cables'),
+        label=_('Use Straight Cables'),
         required=False,
         initial=False,
         help_text=_('Enable this option if you want to draw cables as straight lines '
                     'instead of curves.')
     )
     draw_termination_labels = forms.BooleanField(
-        label=('Termination Labels'),
+        label=_('Termination Labels'),
         required=False,
         initial=False,
         help_text=_('Enable this option if you want to draw a label on each '
                     'cable end.')
     )
     draw_cable_labels = forms.BooleanField(
-        label=('Cable Labels'),
+        label=_('Cable Labels'),
         required=False,
         initial=False,
         help_text=_('Enable this option if you want to draw a cable labels.')

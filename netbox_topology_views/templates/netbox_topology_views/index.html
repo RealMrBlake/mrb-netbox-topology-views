@@ -1,11 +1,12 @@
 {% extends 'generic/_base.html' %}
+{% load i18n %}
 {% load buttons %}
 {% load render_table from django_tables2 %}
 {% load static %}
 {% load perms %}
 {% load helpers %}
 
-{% block title %}Topology Views{% endblock %}
+{% block title %}{% trans "Topology Views" %}{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{% static 'netbox_topology_views/css/vendor.css' %}">
@@ -18,11 +19,11 @@
 			{% block extra_controls %}{% endblock %}
 			<a id="btnDownloadXml" class="btn btn-info" href="#">
 				<i class="mdi mdi-download"></i>
-				Download XML
+				{% trans "Download XML" %}
 			</a>
 			<a id="btnDownloadImage" class="btn btn-info" href="#">
 				<i class="mdi mdi-download"></i>
-				Download PNG
+				{% trans "Download PNG" %}
 			</a>
     	</div>
 	</div>
@@ -33,13 +34,13 @@
     	{% block tab_items %}
 		<li class="nav-item" role="presentation">
 			<button class="nav-link active" id="network-tab" data-bs-toggle="tab" data-bs-target="#networks" type="button" role="tab" aria-controls="filters-form" aria-selected="true">
-			  Network
+			  {% trans "Network" %}
 			</button>
 		</li>
 		{% if filter_form %}
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="filters-form-tab" data-bs-toggle="tab" data-bs-target="#filters-form" type="button" role="tab" aria-controls="object-list" aria-selected="false">
-            Filters
+            {% trans "Filters" %}
             {% if filter_form %}{% badge filter_form.changed_data|length bg_color="blue" %}{% endif %}
           </button>
         </li>
@@ -62,11 +63,11 @@
       <div class="tab-pane show active" id="networks" role="tabpanel" aria-labelledby="network-tab">
         <div class="panel-body">
           {% if filter_required %}
-            <div class="bg-warning text-white p-2">Nothing to display! Set filters and hit search button or set "Draw Default Layout" in your individual options.</div>
+            <div class="bg-warning text-white p-2">{% trans 'Nothing to display! Set filters and hit search button or set "Draw Default Layout" in your individual options.' %}</div>
           {% endif %}
           {% if empty_result %}
-            <div class="bg-warning text-white p-2">Empty result set! Please review your filter settings.</div>
-            <div class="bg-info text-white p-2">Hint: Some options may produce an empty result. Use at least "Show Unconnected/Cables/Logical Connections".</div>
+            <div class="bg-warning text-white p-2">{% trans "Empty result set! Please review your filter settings." %}</div>
+            <div class="bg-info text-white p-2">{% trans 'Hint: Some options may produce an empty result. Use at least "Show Unconnected/Cables/Logical Connections".' %}</div>
           {% endif %}
           <div id="visgraph"></div>
         </div>

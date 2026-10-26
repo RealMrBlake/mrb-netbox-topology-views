@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy as _
 from utilities.choices import ChoiceSet
 
 class NodeLabelItems(ChoiceSet):
@@ -18,19 +19,19 @@ class NodeLabelItems(ChoiceSet):
     ASSET_TAG = 'assettag'
 
     CHOICES = [
-        (DEVICE_NAME, 'Device Name'),
-        (DEVICE_TYPE, 'Device Type'),
-        (ROLE, 'Role'),
-        (DESCRIPTION, 'Description'),
-        (PRIMARY_IPV4, 'Primary IPv4'),
-        (PRIMARY_IPV6, 'Primary IPv6'),
-        (OUT_OF_BAND_IP, 'Out-of-band IP'),
-        (PLATFORM, 'Platform'),
-        (SERIAL, 'Serial'),
-        (TENANT, 'Tenant'),
-        (SITE, 'Site'),
-        (LOCATION, 'Location'),
-        (RACK, 'Rack'),
-        (VIRTUAL_CHASSIS, 'Virtual Chassis'),
-        (ASSET_TAG, 'Asset Tag'),
+        (DEVICE_NAME, _('Device Name')),
+        (DEVICE_TYPE, _('Device Type')),
+        (ROLE, _('Role')),
+        (DESCRIPTION, _('Description')),
+        (PRIMARY_IPV4, _('Primary IPv4')),
+        (PRIMARY_IPV6, _('Primary IPv6')),
+        (OUT_OF_BAND_IP, _('Out-of-band IP')),
+        (PLATFORM, _('Platform')),
+        (SERIAL, _('Serial')),
+        (TENANT, _('Tenant')),
+        (SITE, _('Site')),
+        (LOCATION, _('Location')),
+        (RACK, _('Rack')),
+        (VIRTUAL_CHASSIS, _('Virtual Chassis')),
+        (ASSET_TAG, _('Asset Tag')),
     ]

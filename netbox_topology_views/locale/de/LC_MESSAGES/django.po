@@ -1,0 +1,1094 @@
+# German translation of netbox-topology-views.
+# This file is distributed under the same license as the netbox-topology-views package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: netbox-topology-views\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-26 21:16+0100\n"
+"PO-Revision-Date: 2026-10-26 21:30+0100\n"
+"Last-Translator: MrBlake\n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: __init__.py:7
+msgid "Topology views"
+msgstr "Topologieansichten"
+
+#: __init__.py:8
+msgid "A plugin to render topology maps"
+msgstr "Ein Plugin zur Darstellung von Topologiekarten"
+
+#: choices.py:22
+msgid "Device Name"
+msgstr "Gerätename"
+
+#: choices.py:23
+msgid "Device Type"
+msgstr "Gerätetyp"
+
+#: choices.py:24 forms.py:126 views.py:162
+msgid "Role"
+msgstr "Rolle"
+
+#: choices.py:25 templates/netbox_topology_views/coordinategroup.html:23
+msgid "Description"
+msgstr "Beschreibung"
+
+#: choices.py:26
+msgid "Primary IPv4"
+msgstr "Primäre IPv4"
+
+#: choices.py:27
+msgid "Primary IPv6"
+msgstr "Primäre IPv6"
+
+#: choices.py:28
+msgid "Out-of-band IP"
+msgstr "Out-of-Band-IP"
+
+#: choices.py:29 forms.py:162
+msgid "Platform"
+msgstr "Plattform"
+
+#: choices.py:30 forms.py:134 views.py:165
+msgid "Serial"
+msgstr "Seriennummer"
+
+#: choices.py:31 forms.py:49
+msgid "Tenant"
+msgstr "Mandant"
+
+#: choices.py:32 forms.py:95 forms.py:367 views.py:126 views.py:171
+msgid "Site"
+msgstr "Standort"
+
+#: choices.py:33 forms.py:46 forms.py:105 forms.py:370 views.py:129
+#: views.py:174
+msgid "Location"
+msgstr "Location"
+
+#: choices.py:34 forms.py:116 views.py:177
+msgid "Rack"
+msgstr "Rack"
+
+#: choices.py:35
+msgid "Virtual Chassis"
+msgstr "Virtuelles Chassis"
+
+#: choices.py:36
+msgid "Asset Tag"
+msgstr "Asset-Tag"
+
+#: filters.py:17
+msgid "Search"
+msgstr "Suche"
+
+#: filters.py:22
+msgid "Manufacturer (ID)"
+msgstr "Hersteller (ID)"
+
+#: filters.py:28
+msgid "Manufacturer (slug)"
+msgstr "Hersteller (Slug)"
+
+#: filters.py:32
+msgid "Device type (ID)"
+msgstr "Gerätetyp (ID)"
+
+#: filters.py:37
+msgid "Role (ID)"
+msgstr "Rolle (ID)"
+
+#: filters.py:41
+msgid "Platform (ID)"
+msgstr "Plattform (ID)"
+
+#: filters.py:47
+msgid "Region (ID)"
+msgstr "Region (ID)"
+
+#: filters.py:53
+msgid "Site Group (ID)"
+msgstr "Standortgruppe (ID)"
+
+#: filters.py:57
+msgid "Site (ID)"
+msgstr "Standort (ID)"
+
+#: filters.py:63
+msgid "Location (ID)"
+msgstr "Location (ID)"
+
+#: filters.py:68
+msgid "Rack (ID)"
+msgstr "Rack (ID)"
+
+#: filters.py:76 forms.py:143
+msgid "MAC address"
+msgstr "MAC-Adresse"
+
+#: filters.py:83 forms.py:166
+msgid "Has console ports"
+msgstr "Hat Konsolenports"
+
+#: filters.py:87 forms.py:173
+msgid "Has console server ports"
+msgstr "Hat Konsolenserver-Ports"
+
+#: filters.py:91 forms.py:180
+msgid "Has power ports"
+msgstr "Hat Stromanschlüsse"
+
+#: filters.py:95 forms.py:187
+msgid "Has power outlets"
+msgstr "Hat Steckdosen"
+
+#: filters.py:99 forms.py:194
+msgid "Has interfaces"
+msgstr "Hat Schnittstellen"
+
+#: filters.py:103 forms.py:201
+msgid "Has pass-through ports"
+msgstr "Hat Durchgangsports"
+
+#: filters.py:107
+msgid "Config template (ID)"
+msgstr "Konfigurationsvorlage (ID)"
+
+#: filters.py:111 forms.py:213
+msgid "Has a primary IP"
+msgstr "Hat eine primäre IP"
+
+#: filters.py:115
+msgid "Has an out-of-band IP"
+msgstr "Hat eine Out-of-Band-IP"
+
+#: filters.py:119
+msgid "Is a virtual chassis member"
+msgstr "Ist Mitglied eines virtuellen Chassis"
+
+#: forms.py:40
+msgid "Options"
+msgstr "Optionen"
+
+#: forms.py:43 forms.py:582
+msgid "Additional filter-independent types (non-devices)"
+msgstr "Zusätzliche filterunabhängige Typen (keine Geräte)"
+
+#: forms.py:45 forms.py:66 templates/netbox_topology_views/coordinate.html:22
+#: views.py:1122
+msgid "Device"
+msgstr "Gerät"
+
+#: forms.py:47
+msgid "Operation"
+msgstr "Betrieb"
+
+#: forms.py:48
+msgid "Hardware"
+msgstr "Hardware"
+
+#: forms.py:50
+msgid "Contacts"
+msgstr "Kontakte"
+
+#: forms.py:52
+msgid "Components"
+msgstr "Komponenten"
+
+#: forms.py:55
+msgid "Miscellaneous"
+msgstr "Sonstiges"
+
+#: forms.py:61
+msgid "Coordinate group"
+msgstr "Koordinatengruppe"
+
+#: forms.py:81
+msgid "Region"
+msgstr "Region"
+
+#: forms.py:86
+msgid "Site Group"
+msgstr "Standortgruppe"
+
+#: forms.py:121
+msgid "Device Status"
+msgstr "Gerätestatus"
+
+#: forms.py:129
+msgid "Airflow"
+msgstr "Luftstrom"
+
+#: forms.py:138
+msgid "Asset tag"
+msgstr "Asset-Tag"
+
+#: forms.py:148
+msgid "Manufacturer"
+msgstr "Hersteller"
+
+#: forms.py:156
+msgid "Model"
+msgstr "Modell"
+
+#: forms.py:161
+msgid "None"
+msgstr "Keine"
+
+#: forms.py:209
+msgid "Config template"
+msgstr "Konfigurationsvorlage"
+
+#: forms.py:220
+msgid "Has an OOB IP"
+msgstr "Hat eine OOB-IP"
+
+#: forms.py:227
+msgid "Virtual chassis member"
+msgstr "Mitglied eines virtuellen Chassis"
+
+#: forms.py:236 forms.py:589
+msgid "Ignore Termination Types"
+msgstr "Abschlusstypen ignorieren"
+
+#: forms.py:241 forms.py:611
+msgid "Save Coordinates"
+msgstr "Koordinaten speichern"
+
+#: forms.py:250 forms.py:620
+msgid "Show Unconnected"
+msgstr "Unverbundene anzeigen"
+
+#: forms.py:261 forms.py:628
+msgid "Show Cables"
+msgstr "Kabel anzeigen"
+
+#: forms.py:267 forms.py:636
+msgid "Show Wireless Links"
+msgstr "Funkverbindungen anzeigen"
+
+#: forms.py:273 forms.py:643
+msgid "Show Logical Connections"
+msgstr "Logische Verbindungen anzeigen"
+
+#: forms.py:279 forms.py:651
+msgid "Show redundant Cable and Logical Connection"
+msgstr "Redundante Kabel- und logische Verbindung anzeigen"
+
+#: forms.py:285 forms.py:660
+msgid "Show Neighbors"
+msgstr "Nachbarn anzeigen"
+
+#: forms.py:291 forms.py:668
+msgid "Group Sites"
+msgstr "Standorte gruppieren"
+
+#: forms.py:297 forms.py:675
+msgid "Group Locations"
+msgstr "Locations gruppieren"
+
+#: forms.py:303 forms.py:682
+msgid "Group Racks"
+msgstr "Racks gruppieren"
+
+#: forms.py:309 forms.py:689
+msgid "Group Virtual Chassis"
+msgstr "Virtuelle Chassis gruppieren"
+
+#: forms.py:315
+msgid "Straight Cables"
+msgstr "Gerade Kabel"
+
+#: forms.py:321 forms.py:710
+msgid "Termination Labels"
+msgstr "Abschlussbeschriftungen"
+
+#: forms.py:327 forms.py:717
+msgid "Cable Labels"
+msgstr "Kabelbeschriftungen"
+
+#: forms.py:333 forms.py:723
+msgid "Grid Size"
+msgstr "Rastergröße"
+
+#: forms.py:338
+msgid ""
+"Show grid and snap dragged icons to grid. Set to 0 to disable grid and "
+"snapping."
+msgstr "Raster anzeigen und verschobene Symbole daran ausrichten. 0 deaktiviert Raster und Ausrichtung."
+
+#: forms.py:341 forms.py:733
+msgid "Node Label Items"
+msgstr "Elemente der Knotenbeschriftung"
+
+#: forms.py:348 forms.py:739
+msgid "Show Circuit Terminations"
+msgstr "Leitungsabschlüsse anzeigen"
+
+#: forms.py:349
+msgid "All Circuits will be displayed. Circuits cannot be filtered."
+msgstr "Alle Leitungen werden angezeigt. Leitungen können nicht gefiltert werden."
+
+#: forms.py:355 forms.py:747
+msgid "Show Power Feeds"
+msgstr "Stromzuführungen anzeigen"
+
+#: forms.py:356
+msgid "All Power Feeds will be displayed. Power Feeds cannot be filtered."
+msgstr "Alle Stromzuführungen werden angezeigt. Stromzuführungen können nicht gefiltert werden."
+
+#: forms.py:374
+msgid "Racks"
+msgstr "Racks"
+
+#: forms.py:376
+msgid "Select one or more racks. If empty, all matching racks are shown."
+msgstr "Ein oder mehrere Racks auswählen. Ohne Auswahl werden alle passenden Racks angezeigt."
+
+#: forms.py:379
+msgid "Include empty racks"
+msgstr "Leere Racks einschließen"
+
+#: forms.py:385
+msgid "Group Details"
+msgstr "Gruppendetails"
+
+#: forms.py:399
+msgid "Circuit Coordinate"
+msgstr "Leitungskoordinate"
+
+#: forms.py:408 templates/netbox_topology_views/powerpanelcoordinate.html:22
+#: views.py:138
+msgid "Power Panel"
+msgstr "Stromverteiler"
+
+#: forms.py:417
+msgid "PowerFeed Coordinate"
+msgstr "Stromzuführungskoordinate"
+
+#: forms.py:426
+msgid "Coordinate"
+msgstr "Koordinate"
+
+#: forms.py:457 navigation.py:99
+#: templates/netbox_topology_views/circuitcoordinate_list.html:4
+#: templates/netbox_topology_views/coordinategroup.html:39
+msgid "Circuit Coordinates"
+msgstr "Leitungskoordinaten"
+
+#: forms.py:482
+msgid "PowerPanel Coordinates"
+msgstr "Stromverteilerkoordinaten"
+
+#: forms.py:507
+msgid "PowerFeed Coordinates"
+msgstr "Stromzuführungskoordinaten"
+
+#: forms.py:532 navigation.py:93
+#: templates/netbox_topology_views/circuitcoordinate.html:13
+#: templates/netbox_topology_views/coordinate.html:13
+#: templates/netbox_topology_views/powerfeedcoordinate.html:13
+#: templates/netbox_topology_views/powerpanelcoordinate.html:13
+msgid "Coordinates"
+msgstr "Koordinaten"
+
+#: forms.py:592
+msgid ""
+"Choose Termination Types that you want to be ignored. If any ignored "
+"Termination Type is part of a connection, the cable is not displayed."
+msgstr "Abschlusstypen auswählen, die ignoriert werden sollen. Ist ein ignorierter Abschlusstyp Teil einer Verbindung, wird das Kabel nicht angezeigt."
+
+#: forms.py:597
+msgid "Preselected Device Role"
+msgstr "Vorausgewählte Geräterolle"
+
+#: forms.py:600
+msgid ""
+"Select Device Roles that you want to have preselected in the filter tab."
+msgstr "Geräterollen auswählen, die im Filter-Tab vorausgewählt sein sollen."
+
+#: forms.py:604
+msgid "Preselected Tags"
+msgstr "Vorausgewählte Tags"
+
+#: forms.py:607
+msgid "Select Tags that you want to have preselected in the filter tab."
+msgstr "Tags auswählen, die im Filter-Tab vorausgewählt sein sollen."
+
+#: forms.py:614
+msgid ""
+"Coordinates of nodes will be saved if dragged to a different position. This "
+"option depends on parameters set in the config file. It has no effect if "
+"'allow_coordinates_saving' has not been set or  'always_save_coordinates' "
+"has been set."
+msgstr "Koordinaten von Knoten werden gespeichert, wenn sie an eine andere Position gezogen werden. Diese Option hängt von Parametern der Konfigurationsdatei ab. Sie hat keine Wirkung, wenn 'allow_coordinates_saving' nicht gesetzt oder 'always_save_coordinates' gesetzt ist."
+
+#: forms.py:623
+msgid ""
+"Draws devices that have no connections or for which no connection is "
+"displayed. This option depends on other parameters like 'Show Cables' and "
+"'Show Logical Connections'."
+msgstr "Zeichnet Geräte ohne Verbindungen oder ohne angezeigte Verbindung. Diese Option hängt von anderen Parametern wie 'Kabel anzeigen' und 'Logische Verbindungen anzeigen' ab."
+
+#: forms.py:631
+msgid ""
+"Displays connections between interfaces that are connected with one or more "
+"cables. These connections are displayed as solid lines in the color of the "
+"cable."
+msgstr "Zeigt Verbindungen zwischen Schnittstellen, die mit einem oder mehreren Kabeln verbunden sind. Diese Verbindungen werden als durchgezogene Linien in der Kabelfarbe dargestellt."
+
+#: forms.py:639
+msgid ""
+"Displays wireless connections. These connections are displayed as blue "
+"dotted lines."
+msgstr "Zeigt Funkverbindungen. Diese Verbindungen werden als blau gepunktete Linien dargestellt."
+
+#: forms.py:646
+msgid ""
+"Displays connections between devices that are not directly connected (e.g. "
+"via patch panels). These connections are displayed as yellow dotted lines."
+msgstr "Zeigt Verbindungen zwischen Geräten, die nicht direkt verbunden sind (z. B. über Patchpanels). Diese Verbindungen werden als gelb gepunktete Linien dargestellt."
+
+#: forms.py:654
+msgid ""
+"Shows a logical connection (in addition to a cable), even if a cable is "
+"directly connected. Leaving this option disabled prevents that redundant "
+"display. This option only has an effect if 'Show Logical Connections' is "
+"activated."
+msgstr "Zeigt eine logische Verbindung (zusätzlich zum Kabel), auch wenn ein Kabel direkt verbunden ist. Ist die Option deaktiviert, entfällt diese doppelte Darstellung. Sie wirkt nur, wenn 'Logische Verbindungen anzeigen' aktiviert ist."
+
+#: forms.py:663
+msgid ""
+"Adds neighbors to the filter result set automatically. Link peers will be "
+"added if 'Show Cables' is ticked, far-end terminations will be added if "
+"'Show Logical Connections' is ticked."
+msgstr "Fügt Nachbarn automatisch zum Filterergebnis hinzu. Link-Peers werden ergänzt, wenn 'Kabel anzeigen' aktiviert ist, entfernte Abschlüsse, wenn 'Logische Verbindungen anzeigen' aktiviert ist."
+
+#: forms.py:671
+msgid "Draws a rectangle around Devices that belong to the same site."
+msgstr "Zeichnet ein Rechteck um Geräte desselben Standorts."
+
+#: forms.py:678
+msgid "Draws a rectangle around Devices that belong to the same location."
+msgstr "Zeichnet ein Rechteck um Geräte derselben Location."
+
+#: forms.py:685
+msgid "Draws a rectangle around Devices that belong to the same rack."
+msgstr "Zeichnet ein Rechteck um Geräte desselben Racks."
+
+#: forms.py:692
+msgid ""
+"Draws a rectangle around Devices that belong to the same virtual chassis."
+msgstr "Zeichnet ein Rechteck um Geräte desselben virtuellen Chassis."
+
+#: forms.py:696
+msgid "Draw Default Layout"
+msgstr "Standardlayout zeichnen"
+
+#: forms.py:699
+msgid ""
+"Enable this option if you want to draw the topology on the initial load "
+"(when you go to the topology plugin page)."
+msgstr "Aktivieren, um die Topologie beim ersten Laden zu zeichnen (beim Aufruf der Topologie-Seite)."
+
+#: forms.py:703
+msgid "Use Straight Cables"
+msgstr "Gerade Kabel verwenden"
+
+#: forms.py:706
+msgid ""
+"Enable this option if you want to draw cables as straight lines instead of "
+"curves."
+msgstr "Aktivieren, um Kabel als gerade Linien statt als Kurven zu zeichnen."
+
+#: forms.py:713
+msgid "Enable this option if you want to draw a label on each cable end."
+msgstr "Aktivieren, um an jedem Kabelende eine Beschriftung zu zeichnen."
+
+#: forms.py:720
+msgid "Enable this option if you want to draw a cable labels."
+msgstr "Aktivieren, um Kabelbeschriftungen zu zeichnen."
+
+#: forms.py:728
+msgid ""
+"Default grid value. Set to 0 to disable grid. Integers between 0 and 1000 "
+"are allowed. Snap to grid will be automatically enabled for values > 0."
+msgstr "Standardwert des Rasters. 0 deaktiviert das Raster. Erlaubt sind ganze Zahlen von 0 bis 1000. Bei Werten > 0 wird das Ausrichten am Raster automatisch aktiviert."
+
+#: forms.py:736
+msgid "Choose Label Items that you want to be displayed."
+msgstr "Beschriftungselemente auswählen, die angezeigt werden sollen."
+
+#: forms.py:742
+msgid ""
+"Displays connections between circuit terminations. These connections are "
+"displayed as blue dashed lines. Be aware that Circuits cannot be filtered."
+msgstr "Zeigt Verbindungen zwischen Leitungsabschlüssen. Diese Verbindungen werden als blau gestrichelte Linien dargestellt. Leitungen können nicht gefiltert werden."
+
+#: forms.py:750
+msgid ""
+"Displays connections between power outlets and power ports. These "
+"connections are displayed as solid lines in the color of the cable. This "
+"option depends on 'Show Cables'. Be aware that Power Feeds cannot be "
+"filtered."
+msgstr "Zeigt Verbindungen zwischen Steckdosen und Stromanschlüssen. Diese Verbindungen werden als durchgezogene Linien in der Kabelfarbe dargestellt. Die Option hängt von 'Kabel anzeigen' ab. Stromzuführungen können nicht gefiltert werden."
+
+#: models.py:33
+msgid "role image"
+msgstr "Rollenbild"
+
+#: models.py:34
+msgid "role images"
+msgstr "Rollenbilder"
+
+#: models.py:41
+msgid "Path within the netbox static directory"
+msgstr "Pfad im statischen NetBox-Verzeichnis"
+
+#: models.py:111
+msgid "name"
+msgstr "Name"
+
+#: models.py:117
+msgid "description"
+msgstr "Beschreibung"
+
+#: models.py:126
+msgid "coordinate group"
+msgstr "Koordinatengruppe"
+
+#: models.py:127
+msgid "coordinate groups"
+msgstr "Koordinatengruppen"
+
+#: models.py:141
+msgid "device"
+msgstr "Gerät"
+
+#: models.py:142 models.py:197 models.py:252 models.py:307
+msgid "group"
+msgstr "Gruppe"
+
+#: models.py:145 models.py:200 models.py:255 models.py:310
+msgid "X"
+msgstr "X"
+
+#: models.py:146 models.py:201 models.py:256 models.py:311
+msgid ""
+"X-coordinate of the device (horizontal) on the canvas. Smaller values "
+"correspond to a position further to the left on the monitor."
+msgstr "X-Koordinate des Geräts (horizontal) auf der Zeichenfläche. Kleinere Werte liegen weiter links auf dem Bildschirm."
+
+#: models.py:150 models.py:205 models.py:260 models.py:315
+msgid "Y"
+msgstr "Y"
+
+#: models.py:151 models.py:206 models.py:261 models.py:316
+msgid ""
+"Y-coordinate of the device (vertical) on the canvas. Smaller values "
+"correspond to a position further up on the monitor."
+msgstr "Y-Koordinate des Geräts (vertikal) auf der Zeichenfläche. Kleinere Werte liegen weiter oben auf dem Bildschirm."
+
+#: models.py:168 models.py:223 models.py:278 models.py:333
+msgid ""
+"Automatically generated default group. If you delete this group, all default "
+"coordinates are gone for good but the group itself will be re-created."
+msgstr "Automatisch erzeugte Standardgruppe. Wird sie gelöscht, gehen alle Standardkoordinaten endgültig verloren, die Gruppe selbst wird aber neu angelegt."
+
+#: models.py:181
+msgid "device coordinate"
+msgstr "Gerätekoordinate"
+
+#: models.py:182
+msgid "device coordinates"
+msgstr "Gerätekoordinaten"
+
+#: models.py:196
+msgid "circuit"
+msgstr "Leitung"
+
+#: models.py:236
+msgid "circuit coordinate"
+msgstr "Leitungskoordinate"
+
+#: models.py:237
+msgid "circuit coordinates"
+msgstr "Leitungskoordinaten"
+
+#: models.py:251
+msgid "power panel"
+msgstr "Stromverteiler"
+
+#: models.py:291
+msgid "power panel coordinate"
+msgstr "Stromverteilerkoordinate"
+
+#: models.py:292
+msgid "power panel coordinates"
+msgstr "Stromverteilerkoordinaten"
+
+#: models.py:306
+msgid "power feed"
+msgstr "Stromzuführung"
+
+#: models.py:346
+msgid "power feed coordinate"
+msgstr "Stromzuführungskoordinate"
+
+#: models.py:347
+msgid "power feed coordinates"
+msgstr "Stromzuführungskoordinaten"
+
+#: models.py:448 models.py:449
+msgid "individual options"
+msgstr "Individuelle Optionen"
+
+#: navigation.py:7 navigation.py:22 navigation.py:37 navigation.py:52
+#: navigation.py:67
+msgid "Add"
+msgstr "Hinzufügen"
+
+#: navigation.py:13 navigation.py:28 navigation.py:43 navigation.py:58
+#: navigation.py:73
+msgid "Import"
+msgstr "Importieren"
+
+#: navigation.py:80 templates/netbox_topology_views/index.html:9
+msgid "Topology Views"
+msgstr "Topologieansichten"
+
+#: navigation.py:83 navigation.py:85
+#: templates/netbox_topology_views/location_button.html:2
+#: templates/netbox_topology_views/location_button.html:4
+msgid "Topology"
+msgstr "Topologie"
+
+#: navigation.py:88
+msgid "More views"
+msgstr "Weitere Ansichten"
+
+#: navigation.py:90 templates/netbox_topology_views/rack_elevation.html:6
+msgid "Rack view"
+msgstr "Rack-Ansicht"
+
+#: navigation.py:95 templates/netbox_topology_views/coordinategroup_list.html:4
+msgid "Coordinate Groups"
+msgstr "Koordinatengruppen"
+
+#: navigation.py:96 templates/netbox_topology_views/coordinate_list.html:4
+#: templates/netbox_topology_views/coordinategroup.html:63
+msgid "Device Coordinates"
+msgstr "Gerätekoordinaten"
+
+#: navigation.py:97
+msgid "Power Feed Coords"
+msgstr "Stromzuführungskoord."
+
+#: navigation.py:98
+msgid "Power Panel Coords"
+msgstr "Stromverteilerkoord."
+
+#: navigation.py:102
+msgid "Preferences"
+msgstr "Einstellungen"
+
+#: navigation.py:104
+msgid "Images"
+msgstr "Bilder"
+
+#: navigation.py:105
+msgid "Individual Options"
+msgstr "Individuelle Optionen"
+
+#: tables.py:11
+msgid "Devices"
+msgstr "Geräte"
+
+#: templates/netbox_topology_views/circuitcoordinate.html:6
+#: templates/netbox_topology_views/coordinate.html:6
+#: templates/netbox_topology_views/powerfeedcoordinate.html:6
+#: templates/netbox_topology_views/powerpanelcoordinate.html:6
+msgid "Topology Views Coordinates"
+msgstr "Topologie-Koordinaten"
+
+#: templates/netbox_topology_views/circuitcoordinate.html:18
+#: templates/netbox_topology_views/coordinate.html:18
+#: templates/netbox_topology_views/powerfeedcoordinate.html:18
+#: templates/netbox_topology_views/powerpanelcoordinate.html:18
+msgid "Group"
+msgstr "Gruppe"
+
+#: templates/netbox_topology_views/circuitcoordinate.html:22
+msgid "Circuit"
+msgstr "Leitung"
+
+#: templates/netbox_topology_views/circuitcoordinate.html:26
+#: templates/netbox_topology_views/coordinate.html:26
+#: templates/netbox_topology_views/powerfeedcoordinate.html:26
+#: templates/netbox_topology_views/powerpanelcoordinate.html:26
+msgid "X-Coordinate"
+msgstr "X-Koordinate"
+
+#: templates/netbox_topology_views/circuitcoordinate.html:30
+#: templates/netbox_topology_views/coordinate.html:30
+#: templates/netbox_topology_views/powerfeedcoordinate.html:30
+#: templates/netbox_topology_views/powerpanelcoordinate.html:30
+msgid "Y-Coordinate"
+msgstr "Y-Koordinate"
+
+#: templates/netbox_topology_views/circuitcoordinate_add.html:4
+msgid "Add new Circuit Coordinates"
+msgstr "Neue Leitungskoordinaten hinzufügen"
+
+#: templates/netbox_topology_views/circuitcoordinate_edit.html:4
+msgid "Edit Circuit Coordinates"
+msgstr "Leitungskoordinaten bearbeiten"
+
+#: templates/netbox_topology_views/coordinate_add.html:4
+msgid "Add new Device Coordinates"
+msgstr "Neue Gerätekoordinaten hinzufügen"
+
+#: templates/netbox_topology_views/coordinate_edit.html:4
+msgid "Edit Device Coordinates"
+msgstr "Gerätekoordinaten bearbeiten"
+
+#: templates/netbox_topology_views/coordinategroup.html:7
+msgid "Topology Views Coordinate Group"
+msgstr "Topologie-Koordinatengruppe"
+
+#: templates/netbox_topology_views/coordinategroup.html:14
+msgid "Coordinate Group"
+msgstr "Koordinatengruppe"
+
+#: templates/netbox_topology_views/coordinategroup.html:19
+msgid "Name"
+msgstr "Name"
+
+#: templates/netbox_topology_views/coordinategroup.html:47
+#: templates/netbox_topology_views/powerpanelcoordinate_list.html:4
+msgid "Power Panel Coordinates"
+msgstr "Stromverteilerkoordinaten"
+
+#: templates/netbox_topology_views/coordinategroup.html:55
+#: templates/netbox_topology_views/powerfeedcoordinate_list.html:4
+msgid "Power Feed Coordinates"
+msgstr "Stromzuführungskoordinaten"
+
+#: templates/netbox_topology_views/coordinategroup_add.html:4
+msgid "Add a new Coordinate Group"
+msgstr "Neue Koordinatengruppe hinzufügen"
+
+#: templates/netbox_topology_views/coordinategroup_edit.html:4
+msgid "Edit Coordinate Group"
+msgstr "Koordinatengruppe bearbeiten"
+
+#: templates/netbox_topology_views/images.html:8
+msgid "Topology Views Images"
+msgstr "Topologie-Bilder"
+
+#: templates/netbox_topology_views/images.html:24
+msgid "Image"
+msgstr "Bild"
+
+#: templates/netbox_topology_views/images.html:40
+msgid "Save"
+msgstr "Speichern"
+
+#: templates/netbox_topology_views/images.html:48
+msgid "Saved settings"
+msgstr "Einstellungen gespeichert"
+
+#: templates/netbox_topology_views/index.html:22
+msgid "Download XML"
+msgstr "XML herunterladen"
+
+#: templates/netbox_topology_views/index.html:26
+msgid "Download PNG"
+msgstr "PNG herunterladen"
+
+#: templates/netbox_topology_views/index.html:37
+msgid "Network"
+msgstr "Netzwerk"
+
+#: templates/netbox_topology_views/index.html:43
+msgid "Filters"
+msgstr "Filter"
+
+#: templates/netbox_topology_views/index.html:66
+msgid ""
+"Nothing to display! Set filters and hit search button or set \"Draw Default "
+"Layout\" in your individual options."
+msgstr "Nichts anzuzeigen! Filter setzen und suchen oder in den individuellen Optionen „Standardlayout zeichnen“ aktivieren."
+
+#: templates/netbox_topology_views/index.html:69
+msgid "Empty result set! Please review your filter settings."
+msgstr "Leeres Ergebnis! Bitte die Filtereinstellungen prüfen."
+
+#: templates/netbox_topology_views/index.html:70
+msgid ""
+"Hint: Some options may produce an empty result. Use at least \"Show "
+"Unconnected/Cables/Logical Connections\"."
+msgstr "Hinweis: Manche Optionen liefern ein leeres Ergebnis. Mindestens „Unverbundene/Kabel/Logische Verbindungen anzeigen“ verwenden."
+
+#: templates/netbox_topology_views/individual_options.html:4
+msgid "Topology Views Individual Options"
+msgstr "Individuelle Optionen der Topologieansichten"
+
+#: templates/netbox_topology_views/powerfeedcoordinate.html:22
+msgid "Power Feed"
+msgstr "Stromzuführung"
+
+#: templates/netbox_topology_views/powerfeedcoordinate_add.html:4
+msgid "Add new Power Feed Coordinates"
+msgstr "Neue Stromzuführungskoordinaten hinzufügen"
+
+#: templates/netbox_topology_views/powerfeedcoordinate_edit.html:4
+msgid "Edit Power Feed Coordinates"
+msgstr "Stromzuführungskoordinaten bearbeiten"
+
+#: templates/netbox_topology_views/powerpanelcoordinate_add.html:4
+msgid "Add new Power Panel Coordinates"
+msgstr "Neue Stromverteilerkoordinaten hinzufügen"
+
+#: templates/netbox_topology_views/powerpanelcoordinate_edit.html:4
+msgid "Edit Power Panel Coordinates"
+msgstr "Stromverteilerkoordinaten bearbeiten"
+
+#: templates/netbox_topology_views/rack_elevation.html:15
+msgid "Select racks"
+msgstr "Racks auswählen"
+
+#: templates/netbox_topology_views/rack_elevation.html:29
+msgid "Show"
+msgstr "Anzeigen"
+
+#: templates/netbox_topology_views/rack_elevation.html:30
+msgid "Reset"
+msgstr "Zurücksetzen"
+
+#: templates/netbox_topology_views/rack_elevation.html:38
+msgid "Export all racks:"
+msgstr "Alle Racks exportieren:"
+
+#: templates/netbox_topology_views/rack_elevation.html:49
+#, python-format
+msgid "Export %(name)s"
+msgstr "%(name)s exportieren"
+
+#: templates/netbox_topology_views/rack_elevation.html:88
+msgid "Cable topology"
+msgstr "Kabeltopologie"
+
+#: templates/netbox_topology_views/rack_elevation.html:93
+msgid "Wireless/WLAN"
+msgstr "Funk/WLAN"
+
+#: templates/netbox_topology_views/rack_elevation.html:97 views.py:1117
+msgid "Power"
+msgstr "Strom"
+
+#: templates/netbox_topology_views/rack_elevation.html:105
+msgid "Zoom topology"
+msgstr "Topologie zoomen"
+
+#: templates/netbox_topology_views/rack_elevation.html:106
+msgid "Zoom out"
+msgstr "Verkleinern"
+
+#: templates/netbox_topology_views/rack_elevation.html:107
+msgid "Reset zoom"
+msgstr "Zoom zurücksetzen"
+
+#: templates/netbox_topology_views/rack_elevation.html:108
+msgid "Zoom in"
+msgstr "Vergrößern"
+
+#: templates/netbox_topology_views/rack_elevation.html:111
+msgid "Reset positions"
+msgstr "Positionen zurücksetzen"
+
+#: templates/netbox_topology_views/rack_elevation.html:114 views.py:1120
+msgid "Full screen"
+msgstr "Vollbild"
+
+#: templates/netbox_topology_views/rack_elevation.html:119
+msgid "Topology of the selected racks"
+msgstr "Topologie der ausgewählten Racks"
+
+#: templates/netbox_topology_views/rack_elevation.html:131
+msgid "Cabling of the displayed racks"
+msgstr "Verkabelung der angezeigten Racks"
+
+#: templates/netbox_topology_views/rack_elevation.html:134 views.py:311
+msgid "Cable"
+msgstr "Kabel"
+
+#: templates/netbox_topology_views/rack_elevation.html:134
+msgid "A side"
+msgstr "A-Seite"
+
+#: templates/netbox_topology_views/rack_elevation.html:134
+msgid "B side"
+msgstr "B-Seite"
+
+#: templates/netbox_topology_views/rack_elevation.html:134 views.py:119
+#: views.py:141 views.py:158
+msgid "Type"
+msgstr "Typ"
+
+#: templates/netbox_topology_views/rack_elevation.html:134
+msgid "Status"
+msgstr "Status"
+
+#: templates/netbox_topology_views/rack_elevation.html:143
+msgid "No cabling found."
+msgstr "Keine Verkabelung gefunden."
+
+#: templates/netbox_topology_views/rack_elevation.html:149
+msgid ""
+"No occupied racks were found for this selection. Enable “Include empty "
+"racks” to show empty racks as well."
+msgstr "Für diese Auswahl wurden keine belegten Racks gefunden. Aktiviere „Leere Racks einschließen“, um auch leere Racks zu sehen."
+
+#: templates/netbox_topology_views/rack_elevation.html:151
+msgid "Select one or more racks, or narrow the view by site and location."
+msgstr "Wähle ein oder mehrere Racks oder grenze die Ansicht über Standort und Location ein."
+
+#: templates/netbox_topology_views/toasts.html:14
+msgid "Error"
+msgstr "Fehler"
+
+#: templates/netbox_topology_views/toasts.html:20
+#: templates/netbox_topology_views/toasts.html:41
+msgid "Close"
+msgstr "Schließen"
+
+#: templates/netbox_topology_views/toasts.html:35
+msgid "Success"
+msgstr "Erfolg"
+
+#: utils.py:121
+msgid "Coordinate saving not allowed. Setting has been overridden"
+msgstr "Speichern von Koordinaten ist nicht erlaubt. Die Einstellung wurde überschrieben"
+
+#: utils.py:347
+msgid ""
+"One or more icons are misplaced. This happens if no coordinates are stored "
+"for a device. Turn on coordinates saving and make sure to drag all icons in "
+"the topology to a specific position before exporting to XML."
+msgstr "Ein oder mehrere Symbole sind falsch platziert. Das passiert, wenn für ein Gerät keine Koordinaten gespeichert sind. Koordinatenspeicherung aktivieren und vor dem XML-Export alle Symbole der Topologie an eine feste Position ziehen."
+
+#: views.py:116
+msgid "Provider"
+msgstr "Provider"
+
+#: views.py:143
+msgid "Supply"
+msgstr "Versorgung"
+
+#: views.py:145
+msgid "Phase"
+msgstr "Phase"
+
+#: views.py:147
+msgid "Amperage"
+msgstr "Stromstärke"
+
+#: views.py:149
+msgid "Voltage"
+msgstr "Spannung"
+
+#: views.py:168
+msgid "IP Address"
+msgstr "IP-Adresse"
+
+#: views.py:180 views.py:183
+msgid "Position"
+msgstr "Position"
+
+#: views.py:286
+msgid "termination A name unknown"
+msgstr "Name von Abschluss A unbekannt"
+
+#: views.py:291
+msgid "device A name unknown"
+msgstr "Name von Gerät A unbekannt"
+
+#: views.py:296
+msgid "termination B name unknown"
+msgstr "Name von Abschluss B unbekannt"
+
+#: views.py:301
+msgid "device B name unknown"
+msgstr "Name von Gerät B unbekannt"
+
+#: views.py:315
+#, python-format
+msgid "Circuit provider: %(provider)s<br>Termination"
+msgstr "Leitungsprovider: %(provider)s<br>Abschluss"
+
+#: views.py:319
+msgid "Wireless Connection"
+msgstr "Funkverbindung"
+
+#: views.py:323
+msgid "Power Connection"
+msgstr "Stromverbindung"
+
+#: views.py:326
+msgid "Interface Connection"
+msgstr "Schnittstellenverbindung"
+
+#: views.py:333
+#, python-format
+msgid "Label: %(label)s"
+msgstr "Beschriftung: %(label)s"
+
+#: views.py:341
+#, python-format
+msgid ""
+"%(title)s between<br>%(device_a)s [%(termination_a)s]<br>%(device_b)s "
+"[%(termination_b)s]"
+msgstr "%(title)s zwischen<br>%(device_a)s [%(termination_a)s]<br>%(device_b)s [%(termination_b)s]"
+
+#: views.py:932 views.py:935 views.py:1116
+msgid "External"
+msgstr "Extern"
+
+#: views.py:1086
+msgid "Multi-Access WLAN"
+msgstr "Multi-Access-WLAN"
+
+#: views.py:1087
+msgid "Wireless networks"
+msgstr "Funknetze"
+
+#: views.py:1112 views.py:1123
+msgid "Front"
+msgstr "Vorderseite"
+
+#: views.py:1112 views.py:1124
+msgid "Rear"
+msgstr "Rückseite"
+
+#: views.py:1118
+msgid "Connections"
+msgstr "Verbindungen"
+
+#: views.py:1119
+msgid "No connections"
+msgstr "Keine Verbindungen"
+
+#: views.py:1121
+msgid "Exit full screen"
+msgstr "Vollbild verlassen"
+
+#: views.py:1422
+msgid "Options have been successfully saved"
+msgstr "Optionen wurden gespeichert"

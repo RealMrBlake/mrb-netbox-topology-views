@@ -9,6 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.templatetags.static import static
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 from netbox.models import NetBoxModel
 from netbox.models.features import (
     ChangeLoggingMixin,
@@ -29,13 +30,15 @@ from netbox_topology_views.choices import NodeLabelItems
 
 class RoleImage(ChangeLoggingMixin, ExportTemplatesMixin, EventRulesMixin):
     class Meta:
+        verbose_name = _('role image')
+        verbose_name_plural = _('role images')
         indexes = [
             models.Index(fields=["content_type", "object_id"]),
         ]
 
     objects: "models.Manager[RoleImage]"
 
-    image = models.CharField("Path within the netbox static directory", max_length=255)
+    image = models.CharField(_("Path within the netbox static directory"), max_length=255)
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(null=True, blank=True)
@@ -105,11 +108,13 @@ class CoordinateGroup(NetBoxModel):
     This allows different visualizations with the same devices.
     """
     name = models.CharField(
+        verbose_name=_('name'),
         max_length=100,
         unique=True,
     )
 
     description = models.CharField(
+        verbose_name=_('description'),
         max_length=255,
         blank = True,
     )
@@ -118,6 +123,8 @@ class CoordinateGroup(NetBoxModel):
 
     class Meta:
         ordering = ['name']
+        verbose_name = _('coordinate group')
+        verbose_name_plural = _('coordinate groups')
 
     def __str__(self):
         return self.name
@@ -131,16 +138,18 @@ class Coordinate(NetBoxModel):
     position. Devices belong to one or more coordinate groups. They have to 
     be unique together.
     """
-    device = models.ForeignKey(Device, on_delete=models.CASCADE)
-    group = models.ForeignKey(CoordinateGroup, on_delete=models.CASCADE)
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, verbose_name=_('device'))
+    group = models.ForeignKey(CoordinateGroup, on_delete=models.CASCADE, verbose_name=_('group'))
     
     x = models.IntegerField(
-        help_text='X-coordinate of the device (horizontal) on the canvas. '
-            'Smaller values correspond to a position further to the left on the monitor.',
+        verbose_name=_('X'),
+        help_text=_('X-coordinate of the device (horizontal) on the canvas. '
+            'Smaller values correspond to a position further to the left on the monitor.'),
     )
     y = models.IntegerField(
-        help_text='Y-coordinate of the device (vertical) on the canvas. '
-            'Smaller values correspond to a position further up on the monitor.',
+        verbose_name=_('Y'),
+        help_text=_('Y-coordinate of the device (vertical) on the canvas. '
+            'Smaller values correspond to a position further up on the monitor.'),
     )
 
     _netbox_private = True
@@ -156,9 +165,9 @@ class Coordinate(NetBoxModel):
             else:
                 group = CoordinateGroup(
                     name="default", 
-                    description="Automatically generated default group. If you delete "
+                    description=_("Automatically generated default group. If you delete "
                         "this group, all default coordinates are gone for good but "
-                        "the group itself will be re-created."
+                        "the group itself will be re-created.")
                 )
                 group.save()
                 group_id = group.pk
@@ -169,6 +178,8 @@ class Coordinate(NetBoxModel):
     class Meta:
         ordering = ['group', 'device']
         unique_together = ('device', 'group')
+        verbose_name = _('device coordinate')
+        verbose_name_plural = _('device coordinates')
 
     def __str__(self):
         return f'{self.x};{self.y}'
@@ -182,16 +193,18 @@ class CircuitCoordinate(NetBoxModel):
     position. Devices belong to one or more coordinate groups. They have to 
     be unique together.
     """
-    device = models.ForeignKey(Circuit, on_delete=models.CASCADE)
-    group = models.ForeignKey(CoordinateGroup, on_delete=models.CASCADE)
+    device = models.ForeignKey(Circuit, on_delete=models.CASCADE, verbose_name=_('circuit'))
+    group = models.ForeignKey(CoordinateGroup, on_delete=models.CASCADE, verbose_name=_('group'))
     
     x = models.IntegerField(
-        help_text='X-coordinate of the device (horizontal) on the canvas. '
-            'Smaller values correspond to a position further to the left on the monitor.',
+        verbose_name=_('X'),
+        help_text=_('X-coordinate of the device (horizontal) on the canvas. '
+            'Smaller values correspond to a position further to the left on the monitor.'),
     )
     y = models.IntegerField(
-        help_text='Y-coordinate of the device (vertical) on the canvas. '
-            'Smaller values correspond to a position further up on the monitor.',
+        verbose_name=_('Y'),
+        help_text=_('Y-coordinate of the device (vertical) on the canvas. '
+            'Smaller values correspond to a position further up on the monitor.'),
     )
 
     _netbox_private = True
@@ -207,9 +220,9 @@ class CircuitCoordinate(NetBoxModel):
             else:
                 group = CoordinateGroup(
                     name="default", 
-                    description="Automatically generated default group. If you delete "
+                    description=_("Automatically generated default group. If you delete "
                         "this group, all default coordinates are gone for good but "
-                        "the group itself will be re-created."
+                        "the group itself will be re-created.")
                 )
                 group.save()
                 group_id = group.pk
@@ -220,6 +233,8 @@ class CircuitCoordinate(NetBoxModel):
     class Meta:
         ordering = ['group', 'device']
         unique_together = ('device', 'group')
+        verbose_name = _('circuit coordinate')
+        verbose_name_plural = _('circuit coordinates')
 
     def __str__(self):
         return f'{self.x};{self.y}'
@@ -233,16 +248,18 @@ class PowerPanelCoordinate(NetBoxModel):
     position. Devices belong to one or more coordinate groups. They have to 
     be unique together.
     """
-    device = models.ForeignKey(PowerPanel, on_delete=models.CASCADE)
-    group = models.ForeignKey(CoordinateGroup, on_delete=models.CASCADE)
+    device = models.ForeignKey(PowerPanel, on_delete=models.CASCADE, verbose_name=_('power panel'))
+    group = models.ForeignKey(CoordinateGroup, on_delete=models.CASCADE, verbose_name=_('group'))
     
     x = models.IntegerField(
-        help_text='X-coordinate of the device (horizontal) on the canvas. '
-            'Smaller values correspond to a position further to the left on the monitor.',
+        verbose_name=_('X'),
+        help_text=_('X-coordinate of the device (horizontal) on the canvas. '
+            'Smaller values correspond to a position further to the left on the monitor.'),
     )
     y = models.IntegerField(
-        help_text='Y-coordinate of the device (vertical) on the canvas. '
-            'Smaller values correspond to a position further up on the monitor.',
+        verbose_name=_('Y'),
+        help_text=_('Y-coordinate of the device (vertical) on the canvas. '
+            'Smaller values correspond to a position further up on the monitor.'),
     )
 
     _netbox_private = True
@@ -258,9 +275,9 @@ class PowerPanelCoordinate(NetBoxModel):
             else:
                 group = CoordinateGroup(
                     name="default", 
-                    description="Automatically generated default group. If you delete "
+                    description=_("Automatically generated default group. If you delete "
                         "this group, all default coordinates are gone for good but "
-                        "the group itself will be re-created."
+                        "the group itself will be re-created.")
                 )
                 group.save()
                 group_id = group.pk
@@ -271,6 +288,8 @@ class PowerPanelCoordinate(NetBoxModel):
     class Meta:
         ordering = ['group', 'device']
         unique_together = ('device', 'group')
+        verbose_name = _('power panel coordinate')
+        verbose_name_plural = _('power panel coordinates')
 
     def __str__(self):
         return f'{self.x};{self.y}'
@@ -284,16 +303,18 @@ class PowerFeedCoordinate(NetBoxModel):
     position. Devices belong to one or more coordinate groups. They have to 
     be unique together.
     """
-    device = models.ForeignKey(PowerFeed, on_delete=models.CASCADE)
-    group = models.ForeignKey(CoordinateGroup, on_delete=models.CASCADE)
+    device = models.ForeignKey(PowerFeed, on_delete=models.CASCADE, verbose_name=_('power feed'))
+    group = models.ForeignKey(CoordinateGroup, on_delete=models.CASCADE, verbose_name=_('group'))
     
     x = models.IntegerField(
-        help_text='X-coordinate of the device (horizontal) on the canvas. '
-            'Smaller values correspond to a position further to the left on the monitor.',
+        verbose_name=_('X'),
+        help_text=_('X-coordinate of the device (horizontal) on the canvas. '
+            'Smaller values correspond to a position further to the left on the monitor.'),
     )
     y = models.IntegerField(
-        help_text='Y-coordinate of the device (vertical) on the canvas. '
-            'Smaller values correspond to a position further up on the monitor.',
+        verbose_name=_('Y'),
+        help_text=_('Y-coordinate of the device (vertical) on the canvas. '
+            'Smaller values correspond to a position further up on the monitor.'),
     )
 
     _netbox_private = True
@@ -309,9 +330,9 @@ class PowerFeedCoordinate(NetBoxModel):
             else:
                 group = CoordinateGroup(
                     name="default", 
-                    description="Automatically generated default group. If you delete "
+                    description=_("Automatically generated default group. If you delete "
                         "this group, all default coordinates are gone for good but "
-                        "the group itself will be re-created."
+                        "the group itself will be re-created.")
                 )
                 group.save()
                 group_id = group.pk
@@ -322,6 +343,8 @@ class PowerFeedCoordinate(NetBoxModel):
     class Meta:
         ordering = ['group', 'device']
         unique_together = ('device', 'group')
+        verbose_name = _('power feed coordinate')
+        verbose_name_plural = _('power feed coordinates')
 
     def __str__(self):
         return f'{self.x};{self.y}'
@@ -420,6 +443,10 @@ class IndividualOptions(NetBoxModel):
     )
     
     _netbox_private = True
+
+    class Meta:
+        verbose_name = _('individual options')
+        verbose_name_plural = _('individual options')
 
     def __str___(self):
         return f"{self.user_id}"
