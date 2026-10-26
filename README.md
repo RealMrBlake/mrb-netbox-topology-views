@@ -15,6 +15,16 @@ of one or more racks including front, rear and cabling.
 | **Python** | see `setup.py` |
 | **Repository** | <https://git.mrblake.cc/MrBlake/mrb-netbox-topology-views> |
 
+## Screenshots
+
+Cable topology of a site, arranged with a coordinate group:
+
+![Topology view](docs/screenshots/topology.png)
+
+Rack view with front and rear elevations:
+
+![Rack view](docs/screenshots/rack-view.png)
+
 ## Features
 
 - Show one or more racks together
