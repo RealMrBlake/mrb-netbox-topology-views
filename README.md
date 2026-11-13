@@ -7,6 +7,12 @@ The plugin builds topologies from the devices, ports and cables maintained in
 NetBox. In addition to the classic topology, this fork provides a complete view
 of one or more racks including front, rear and cabling.
 
+> **Fork notice:** This is a modified version of
+> [NetBox Topology Views](https://github.com/mattieserver/netbox-topology-views) by
+> **Mattijs Vanhaverbeke** and contributors, licensed under the [Apache License 2.0](LICENSE).
+> It is maintained independently and is not affiliated with or endorsed by the original
+> author. See [Origin, credits and licenses](#origin-credits-and-licenses).
+
 | | |
 |---|---|
 | **Plugin name** | `netbox_topology_views` |
@@ -222,19 +228,29 @@ Rack view: `dcim.view_rack`, `dcim.view_device`, `dcim.view_cable`.
 Saving classic topology coordinates additionally requires the corresponding
 permissions on `netbox_topology_views.coordinate`.
 
-## Origin and credits
+## Origin, credits and licenses
 
-This project is a fork of the open-source plugin
-[NetBox Topology Views](https://github.com/mattieserver/netbox-topology-views).
-The original plugin was created by **Mattijs Vanhaverbeke**. Most of the classic
-topology view, data models, filters and export functions are based on his work
-and the contributions to the original project.
+**Original project:** [NetBox Topology Views](https://github.com/mattieserver/netbox-topology-views),
+created by **Mattijs Vanhaverbeke** and developed with its contributors. Most of the classic
+topology view, data models, filters and export functions are based on their work. This fork
+is based on release v4.5.1, and the complete original commit history is retained in this
+repository. The changes are listed in [Changes compared to the original](#changes-compared-to-the-original).
 
-This fork is developed independently and is not officially affiliated with the
-original author or the NetBox project.
+**This fork:** maintained by MrBlake at
+[git.mrblake.cc/MrBlake/mrb-netbox-topology-views](https://git.mrblake.cc/MrBlake/mrb-netbox-topology-views).
+It is not affiliated with or endorsed by the original author, the original contributors or
+NetBox Labs. Please report problems with this fork
+[here](https://git.mrblake.cc/MrBlake/mrb-netbox-topology-views/issues), not to the original project.
 
-## License
+**Licenses:**
 
-Like the original, this project is licensed under the
-[Apache License 2.0](LICENSE). Existing copyright, license and attribution
-notices of the original project are retained.
+| Part | License |
+|---|---|
+| Source code (original and modifications) | [Apache License 2.0](LICENSE) |
+| Device icons in `netbox_topology_views/static/netbox_topology_views/img/` | [CC BY-SA 4.0](netbox_topology_views/static/netbox_topology_views/img/LICENSE), by the contributors of NetBox Topology Views; the icons `network-switch`, `leaf-switch`, `spine-switch` and `aggregation-switch` were added in this fork under the same license |
+| vis-network, vis-data, vis-util (bundled in `js/app.js`) | Apache-2.0 OR MIT |
+| Hammer.js (bundled in `js/app.js`) | MIT |
+
+The [NOTICE](NOTICE) file lists the copyright holders. The original copyright and license
+notices are retained, and every file changed in this fork carries a notice stating that it
+was modified.

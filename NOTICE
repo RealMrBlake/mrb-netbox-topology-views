@@ -1,0 +1,31 @@
+MRB NetBox Topology Views
+Original work: NetBox Topology Views by Mattijs Vanhaverbeke and contributors
+Modifications Copyright 2026 MrBlake
+
+This product is a modified version of NetBox Topology Views
+(https://github.com/mattieserver/netbox-topology-views), based on its release v4.5.1.
+
+The original work is licensed under the Apache License, Version 2.0. The
+modifications are distributed under the same license; see the LICENSE file.
+Files that were changed in this fork carry a notice stating that they were
+modified. The complete history, including all original commits, is available at
+https://git.mrblake.cc/MrBlake/mrb-netbox-topology-views
+
+Device icons
+------------
+The SVG icons in netbox_topology_views/static/netbox_topology_views/img/ are
+licensed under the Creative Commons Attribution-ShareAlike 4.0 International
+license (CC BY-SA 4.0); see the LICENSE file in that directory. They were created
+by the contributors of NetBox Topology Views. The icons network-switch.svg,
+leaf-switch.svg, spine-switch.svg and aggregation-switch.svg were added in this
+fork and are also licensed under CC BY-SA 4.0.
+
+Third-party software
+--------------------
+netbox_topology_views/static/netbox_topology_views/js/app.js bundles:
+- vis-network 9.1.10, vis-data 7.1.9, vis-util 5.0.7 (Apache-2.0 OR MIT)
+- Hammer.js (MIT)
+Their copyright and license notices are retained in the bundle.
+
+This fork is maintained independently and is not affiliated with or endorsed
+by Mattijs Vanhaverbeke, the original contributors or NetBox Labs.

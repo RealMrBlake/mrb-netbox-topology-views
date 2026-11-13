@@ -1,3 +1,5 @@
+# Modified by MrBlake for the MRB NetBox Topology Views fork: https://git.mrblake.cc/MrBlake/mrb-netbox-topology-views
+# Based on mattieserver/netbox-topology-views (Apache License 2.0). See the LICENSE and NOTICE files.
 from django.urls import path
 from django.views.generic.base import RedirectView
 from netbox.views.generic import ObjectChangeLogView

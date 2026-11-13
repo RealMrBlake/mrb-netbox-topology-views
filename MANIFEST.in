@@ -1,3 +1,5 @@
+include LICENSE
+include NOTICE
 recursive-include netbox_topology_views/static *
 recursive-include netbox_topology_views/templates *
 recursive-include netbox_topology_views/api *
